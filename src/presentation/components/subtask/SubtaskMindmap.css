@@ -1,0 +1,457 @@
+/* SubtaskMindmap.css */
+
+/* 메인 컨테이너 */
+.subtask-mindmap-container {
+  height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 툴바 영역 */
+.subtask-toolbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  backdrop-filter: blur(10px);
+}
+
+/* 세부 작업 추가 버튼 */
+.add-subtask-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-subtask-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.add-subtask-btn:hover::before {
+  left: 100%;
+}
+
+.add-subtask-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.add-subtask-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* 마인드맵 정보 영역 */
+.mindmap-info {
+  display: flex;
+  gap: 24px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mindmap-info span {
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.mindmap-info span:hover {
+  background-color: #ffffff;
+  border-color: #007bff;
+  color: #007bff;
+  transform: translateY(-1px);
+}
+
+/* 마인드맵 캔버스 */
+.subtask-mindmap-canvas {
+  flex: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.subtask-mindmap-canvas:hover {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 노드 공통 스타일 */
+.subtask-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: grab;
+  border: 2px solid transparent;
+  backdrop-filter: blur(10px);
+}
+
+.subtask-node:active {
+  cursor: grabbing;
+}
+
+/* 노드 호버 효과 */
+.subtask-node:hover {
+  transform: scale(1.1) translateZ(0);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  filter: brightness(1.1);
+}
+
+/* 중심 노드 특별 스타일 */
+.subtask-node.center {
+  background: linear-gradient(135deg, #e24a6f 0%, #c73650 100%);
+  transform: scale(1.1);
+  font-size: 16px;
+  box-shadow: 0 6px 20px rgba(226, 74, 111, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.subtask-node.center:hover {
+  transform: scale(1.2);
+  box-shadow: 0 10px 30px rgba(226, 74, 111, 0.5);
+}
+
+/* 우선순위별 노드 색상 */
+.subtask-node.priority-high {
+  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.subtask-node.priority-medium {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+.subtask-node.priority-low {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* 진행도 표시 링 */
+.subtask-node::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 3px solid transparent;
+  border-radius: inherit;
+  transition: all 0.3s ease;
+}
+
+/* 진행도 100% */
+.subtask-node.completed::after {
+  border-color: #28a745;
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+  animation: completedPulse 2s infinite;
+}
+
+@keyframes completedPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.05);
+  }
+}
+
+/* 진행도 50% 이상 */
+.subtask-node.in-progress::after {
+  border-color: #ffc107;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+}
+
+/* 노드 버튼 컨테이너 */
+.subtask-node-buttons {
+  position: absolute;
+  top: -40px;
+  right: -15px;
+  display: flex;
+  gap: 6px;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  animation: buttonFadeIn 0.3s ease forwards;
+}
+
+@keyframes buttonFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 노드 액션 버튼 */
+.subtask-node-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.subtask-node-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.subtask-node-button:hover::before {
+  opacity: 1;
+}
+
+.subtask-node-button:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.subtask-node-button:active {
+  transform: scale(0.95);
+}
+
+/* 수정 버튼 */
+.subtask-node-button.edit {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.subtask-node-button.edit:hover {
+  background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+}
+
+/* 삭제 버튼 */
+.subtask-node-button.delete {
+  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+}
+
+.subtask-node-button.delete:hover {
+  background: linear-gradient(135deg, #bd2130 0%, #a71e2a 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* 연결선 스타일 */
+.subtask-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, #6c757d 0%, #495057 100%);
+  transform-origin: 0 50%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.subtask-line::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, rgba(108, 117, 125, 0.3) 50%, transparent 100%);
+}
+
+/* 드래그 상태 */
+.subtask-mindmap-canvas.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.subtask-node.dragging {
+  z-index: 1000;
+  transform: scale(1.1) rotate(2deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: none;
+}
+
+/* 로딩 상태 */
+.subtask-mindmap-container.loading {
+  pointer-events: none;
+}
+
+.subtask-mindmap-container.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(248, 249, 250, 0.8);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .subtask-toolbar {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .mindmap-info {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .add-subtask-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .subtask-node {
+    font-size: 10px;
+  }
+  
+  .subtask-node.center {
+    font-size: 12px;
+  }
+  
+  .subtask-node-buttons {
+    top: -35px;
+    right: -10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .subtask-mindmap-container {
+    height: calc(100vh - 100px);
+  }
+  
+  .subtask-toolbar {
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+  
+  .subtask-mindmap-canvas {
+    border-radius: 8px;
+  }
+  
+  .subtask-node-buttons {
+    gap: 4px;
+  }
+  
+  .subtask-node-button {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+}
+
+/* 다크 모드 지원 (필요시 사용) */
+@media (prefers-color-scheme: dark) {
+  .subtask-mindmap-container {
+    background-color: #212529;
+  }
+  
+  .subtask-toolbar {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    border-color: #495057;
+  }
+  
+  .subtask-mindmap-canvas {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    border-color: #495057;
+  }
+  
+  .mindmap-info {
+    color: #adb5bd;
+  }
+  
+  .mindmap-info span {
+    background-color: rgba(52, 58, 64, 0.8);
+    border-color: #495057;
+    color: #adb5bd;
+  }
+  
+  .subtask-line {
+    background: linear-gradient(90deg, #adb5bd 0%, #6c757d 100%);
+  }
+}
+
+/* 접근성 향상 */
+@media (prefers-reduced-motion: reduce) {
+  .subtask-node,
+  .add-subtask-btn,
+  .subtask-node-button,
+  .subtask-line {
+    transition: none;
+    animation: none;
+  }
+  
+  .subtask-node:hover {
+    transform: none;
+  }
+}
+
+/* 고해상도 디스플레이 최적화 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .subtask-node {
+    transform: translateZ(0);
+  }
+  
+  .subtask-line {
+    transform: translateZ(0);
+  }
+}

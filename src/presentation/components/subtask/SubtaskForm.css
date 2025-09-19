@@ -1,0 +1,312 @@
+/* SubtaskForm.css */
+
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+/* 모달 컨테이너 */
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 모달 제목 */
+.modal h2 {
+  margin: 0 0 24px 0;
+  color: #212529;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* 폼 스타일 */
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 라벨 스타일 */
+.modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #495057;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* 필수 항목 표시 */
+.modal label:has(input[required])::after,
+.modal label:has(select[required])::after {
+  content: " *";
+  color: #dc3545;
+}
+
+/* 폼 행 (가로 배치) */
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .modal label {
+  flex: 1;
+}
+
+/* 절반 너비 요소 */
+.half-width {
+  flex: 1;
+}
+
+/* 입력 필드 공통 스타일 */
+.modal input,
+.modal select,
+.modal textarea {
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  background-color: #fff;
+}
+
+/* 포커스 상태 */
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background-color: #fff;
+}
+
+/* 호버 상태 */
+.modal input:hover:not(:focus),
+.modal select:hover:not(:focus),
+.modal textarea:hover:not(:focus) {
+  border-color: #ced4da;
+}
+
+/* 비활성화 상태 */
+.modal input:disabled,
+.modal select:disabled,
+.modal textarea:disabled {
+  background-color: #f8f9fa;
+  border-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* 텍스트 영역 */
+.modal textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* 숫자 입력 필드 스피너 숨기기 */
+.modal input[type="number"]::-webkit-outer-spin-button,
+.modal input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.modal input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* 셀렉트 박스 커스텀 화살표 */
+.modal select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* 플레이스홀더 스타일 */
+.modal input::placeholder,
+.modal textarea::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+/* 폼 버튼 컨테이너 */
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* 버튼 공통 스타일 */
+.submit-btn,
+.cancel-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 제출 버튼 */
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* 취소 버튼 */
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #545b62;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+.cancel-btn:active {
+  transform: translateY(0);
+}
+
+/* 버튼 비활성화 상태 */
+.submit-btn:disabled,
+.cancel-btn:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 576px) {
+  .modal {
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-buttons {
+    flex-direction: column-reverse;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+/* 애니메이션 효과 */
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  animation: inputFocus 0.2s ease;
+}
+
+@keyframes inputFocus {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+
+/* 에러 상태 (필요시 사용) */
+.modal input.error,
+.modal select.error,
+.modal textarea.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* 성공 상태 (필요시 사용) */
+.modal input.success,
+.modal select.success,
+.modal textarea.success {
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+/* 로딩 상태 버튼 (필요시 사용) */
+.submit-btn.loading {
+  color: transparent;
+}
+
+.submit-btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
