@@ -1,0 +1,56 @@
+.project-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.project-item {
+  padding: 10px 8px;
+  margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: white;
+  font-size: 14px;
+  
+  /* 가로 오버플로우 방지 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.project-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.no-projects-message {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  text-align: center;
+  margin: 20px 0;
+  
+  /* 가로 오버플로우 방지 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 사이드바가 접힌 상태에서 텍스트 숨김 */
+.sidebar:not(:hover) .project-item,
+.sidebar:not(:hover) .no-projects-message {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 사이드바가 펼쳐진 상태에서 텍스트 표시 */
+.sidebar:hover .project-item,
+.sidebar:hover .no-projects-message {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}

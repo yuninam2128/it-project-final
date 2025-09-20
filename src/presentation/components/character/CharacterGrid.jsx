@@ -4,6 +4,7 @@ import "./CharacterGrid.css";
 import CharacterDisplay from "./CharacterDisplay";
 import { saveUserCharacterData, getUserCharacterData, initializeUserCharacterData } from "../../../services/characters";
 import { subscribeAuth } from  "../../../services/auth"
+import Sidebar from "../sidebar/Sidebar";
 
 function CharacterGrid({ characters, onSelect }) {
   const navigate = useNavigate();
@@ -169,11 +170,6 @@ function CharacterGrid({ characters, onSelect }) {
     }
   };
 
-  // 홈 아이콘 클릭 핸들러
-  const handleHomeClick = () => {
-    navigate('/home');
-  };
-
   // 로딩 중일 때 표시
   if (isLoading) {
     return (
@@ -196,35 +192,7 @@ function CharacterGrid({ characters, onSelect }) {
     <div className="backgroundColor">
       {/* 사이드바 */}
       <div className="side-bar">
-        <div className="sidebar-top-icons">
-          {/*
-          <div 
-            className="sidebar-icon search-icon active"
-            style={{ backgroundImage: `url('/images/searchingIcon.png')` }}
-          ></div>
-          */}
-          
-          {/* 홈 아이콘 */}
-          <div 
-            className="sidebar-icon home-icon" 
-            onClick={handleHomeClick}
-            style={{ backgroundImage: `url('/images/homeIcon.png')` }}
-          ></div>
-          
-          {/* 스토어 아이콘 */}
-          <div 
-            className="sidebar-icon store-icon"
-            style={{ backgroundImage: `url('/images/storeIcon.png')` }}
-          ></div>
-        </div>
-        
-        {/* 하단 사용자 프로필 아이콘 */}
-        <div className="sidebar-bottom-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="white" strokeWidth="2"/>
-            <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2"/>
-          </svg>
-        </div>
+        <Sidebar />
       </div>
       
       <div className="backRectangle">

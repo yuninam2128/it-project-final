@@ -2,30 +2,31 @@
 .simple-timeline {
   position: relative;
   width: 100%;
-  height: 200px; /* 높이 증가 */
-  background: #f0f0f0;
-  border: 2px solid #ccc;
-  margin: 20px 0;
-  padding: 20px;
+  height: 100%; /* 높이 증가 */
+  background: linear-gradient(135deg,#3c3477b0, #7a89a5);
+  border: none;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
-  overflow-x: auto; /* 가로 스크롤 허용 */
+  padding: auto;
+  box-shadow: inset 0 0 25px rgba(162, 172, 255, 0.962);
 }
 
 .simple-line {
   position: absolute;
-  top: 40px;
+  top: 50%;
   left: 20px;
   right: 20px;
-  height: 4px;
-  background: #666;
+  height: 2px;
+  background: #edededc6;
 }
 
 .simple-dot {
   position: absolute;
-  top: 32px; /* 라인 위에 정확히 위치 */
+  top: 43%; /* 라인 위에 정확히 위치 */
   width: 20px;
   height: 20px;
-  background: red;
   border-radius: 50%;
   transform: translateX(-50%);
   color: white;
@@ -37,15 +38,19 @@
   z-index: 10;
 }
 
-.debug-info {
-  position: absolute;
-  top: 5px;
-  left: 20px;
-  font-weight: bold;
-  color: #333;
-  font-size: 12px;
+/* 진행 상태별 색상 */
+.simple-dot.normal {
+  background: rgb(149, 216, 255); /* 정상 진행 */
 }
 
-.debug-info div {
-  margin-bottom: 2px;
+.simple-dot.warning {
+  background: rgb(252, 255, 154); /* 60% 이상 */
+}
+
+.simple-dot.danger {
+  background: #ff91ca; /* 80% 이상 */
+}
+
+.simple-dot.overdue {
+  background: gray; /* 마감 초과 */
 }

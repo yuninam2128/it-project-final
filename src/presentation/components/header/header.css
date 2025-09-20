@@ -1,0 +1,33 @@
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  width: 100%;
+}
+
+.header__button {
+  background: #43476B; 
+  border: none;
+  border-radius: 44px;
+  padding : 10px 15px;
+  color: #ffffff;
+  display: inline-flex; 
+  align-items: center;
+  gap: 20px;
+  min-height : 40px;
+  margin-left: 5px;
+}
+
+.header__button--right {
+  min-width:100px;
+}
+
+.header__button img {
+  width: 20px;
+  height: 20px;
+}
+
+.left-header .header__button:active{
+  background: #ffffff;
+  color:#0A0F33
+}

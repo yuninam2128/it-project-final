@@ -16,7 +16,7 @@ function SubtaskLine({ from, to }) {
         top: from.y,
         width: length,
         height: '2px',
-        backgroundColor: '#333',
+        backgroundColor: '#bdbdbdff',
         transformOrigin: '0 50%',
         transform: `rotate(${angle}deg)`,
         zIndex: 0,

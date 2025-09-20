@@ -1,0 +1,136 @@
+/* SubtaskNode.css */
+
+.subtask-wrapper {
+  position: absolute;
+  z-index: 1;
+  padding: 20px;
+  margin: -20px;
+}
+
+.subtask-wrapper.dragging {
+  z-index: 1000;
+}
+
+.subtask-node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+  cursor: grab;
+  transition: all 0.1s ease;
+}
+
+.subtask-node.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.subtask-node.center {
+  font-size: 14px;
+}
+
+.subtask-node:not(.center) {
+  font-size: 12px;
+}
+
+.subtask-node-content {
+  padding: 5px;
+}
+
+.subtask-node-progress {
+  font-size: 10px;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.subtask-node-buttons {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: -20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 9999;
+}
+
+.subtask-node-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background-color: #AFB8FF;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.subtask-node-button:hover {
+  background-color: #9BA6FF;
+  transform: scale(1.1);
+}
+
+/* 중요도별 색상 클래스 */
+.priority-high {
+  background-image: url('../images/pj-high.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; 
+}
+
+.priority-medium {
+  background-image: url('../images/pj-mid.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.priority-low {
+  background-image: url('../images/pj-low.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.priority-default {
+  background-color: #6c757d;
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.center-high{
+  background-image: url('../images/pj-high.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.center-medium {
+  background-image: url('../images/pj-mid.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.center-low {
+  background-image: url('../images/pj-low.png');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}
+
+.center-default {
+  background-color: #6c757d;
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;
+}

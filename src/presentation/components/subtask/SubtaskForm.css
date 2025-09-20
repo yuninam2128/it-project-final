@@ -140,9 +140,9 @@
   margin: 0;
 }
 
-.modal input[type="number"] {
+/* .modal input[type="number"] {
   -moz-appearance: textfield;
-}
+} */
 
 /* 셀렉트 박스 커스텀 화살표 */
 .modal select {

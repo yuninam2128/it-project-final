@@ -1,11 +1,11 @@
 // Home.jsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 // Firebase Timestamp 제거
-// import Header from "../components/header/header"; //(명시)
+import Header from "../components/header/header"; //(명시)
 import ProjectMap from "../components/project/ProjectMap"; // (명시)
-// import TodoList from "../components/todo/Todo"; //(명시)
-// import Sidebar from "../components/sidebar/Sidebar"; //(명시)
+import TodoList from "../components/todo/TodoList"; //(명시)
+import Sidebar from "../components/sidebar/Sidebar"; //(명시)
 import Inspiration from "../components/inspiration/Inspiration"; //(명시)
 import ProjectTimeline from "../components/project/ProjectTimeline"; //(명시)
 
@@ -31,6 +31,7 @@ function Home() {
   const navigate = useNavigate(); //페이지 이동 함수 
   const [displayName, setDisplayName] = useState(''); //이름 가져오는 중인지 여부 
   const [isLoadingName, setIsLoadingName] = useState(true);
+  // const today = getCurrentDate(); // 오늘 날짜 변수
 
   //로그인 상태 구독
   useEffect(() => {
@@ -325,106 +326,26 @@ function Home() {
   }
 
   return ( 
-    // <div className ="container">
-    //   //좌측 사이드바
-    //   {/* <Sidebar /> */}
-
-    //   // 가운데 & 오른쪽 
-    //   <div className="main-content">
-    //     //헤더
-    //     <Header displayName={displayName} isLoadingName={isLoadingName} />
-
-    //     //콘텐트
-    //     <div className="content-area">
-    //         <div className="project-map-container">
-    //           <ProjectMap
-    //             projects={projects}
-    //             positions={positions}
-    //             onDeleteProject={deleteProject}
-    //             onEditProject={editProject}
-    //           onPositionsChange={handlePositionChange}
-    //         />
-          
-    //         {showForm && (
-    //           <ProjectForm
-    //             onSubmit={handleAddProject}
-    //             onClose={() => setShowForm(false)}
-    //           />
-    //         )}
-    //         </div>
-    //       <div>
-    //         <div className="right-sidebar">
-    //           <div className="todo">
-    //             <h3>오늘의 할 일</h3>
-    //             {/*투두리스트 추가예정*/}
-    //           </div>
-    //           <div className="inspiration">
-    //             <Inspiration />
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //     //타임라인
-    //     <footer className="timeline">
-    //       <ProjectTimeline projects={projects} />
-    //     </footer>
-    //   </div>
-    // </div>
-
     <div className="game-container">
 
       {/* 게임 스타일 사이드바 */}
-      <div className="sidebar">
-        <div className="profile-section">
-          <div className="profile-avatar">
-            <div className="avatar-circle"></div>
-          </div>
-          <div className="profile-info">
-            <h2 className="profile-name">
-              {isLoadingName ? '로딩 중...' : (displayName || '코딩잘하고싶엉')}
-            </h2>
-            <button
-              className="logout-button"
-              onClick={() => navigate("/")}
-            >
-              로그아웃
-            </button>
-          </div>
-        </div>
-
-        <div className="menu-section">
-          <button
-            className="game-button search"
-          >
-            검색
-          </button>
-          <button 
-            className="game-button add-project"
-            onClick={() => setShowForm(true)}
-          >
-            프로젝트 추가
-          </button>
-          <button 
-            className="game-button store"
-            onClick={() => navigate("/store")}
-          >
-            상점
-          </button>
-        </div>
-        <div>
-          <h5>프로젝트 목록</h5>
-        </div>    
+      <div className="sidebar-container">
+        <Sidebar />
       </div>
 
       {/* 메인 콘텐츠 영역 */}
       <div className="main-content">
         {/* 헤더 */}
         <header className="main-header">
-          <p>{getCurrentDate()}</p>
-          <h1>
-            {isLoadingName ? '로딩 중...' : `${displayName || '사용자'}님`}, 오늘은 어떤 우주를 정복해볼까요?
-          </h1>
+          <Header 
+            isLoadingName={isLoadingName}
+            displayName={displayName}
+            currentDate={getCurrentDate()}
+            onAddClick={() => setShowForm(true)}
+          />
+          <div className="main-header-info">
+            <h1>{displayName}님, 오늘은 어떤 우주를 정복해볼까요?</h1>
+          </div>
         </header>
 
         {/*작업영역*/}
@@ -451,6 +372,7 @@ function Home() {
             <div className="todo">
               <h3>오늘의 할 일</h3>
               {/*투두리스트 추가예정*/}
+              <TodoList/>
             </div>
             <div className="inspiration">
               <Inspiration />

@@ -1,12 +1,331 @@
-import React, { useState, useEffect } from "react";
-import { 
-  subscribeToSubtaskTodos,
-  addSubtaskTodo,
-  updateSubtaskTodo,
-  deleteSubtaskTodo
-} from '../../../services/projects';
+import React, { useState } from "react";
 
-// 유틸리티 함수들
+// 기존 TodoManager.css 스타일과 동일하게 유지
+const styles = `
+.todo-bar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.todo-container {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #6c757d;
+  text-align: center;
+}
+
+.placeholder-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.placeholder-text {
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.placeholder-subtext {
+  font-size: 14px;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.todo-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.todo-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.todo-subtitle {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #007bff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: #e9ecef;
+}
+
+.month-year {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.calendar-days {
+  margin-bottom: 20px;
+}
+
+.calendar-days > div {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day {
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  background: white;
+  transition: all 0.2s;
+  font-weight: 500;
+  position: relative;
+}
+
+.day:hover:not(.disabled) {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.day.today {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.day.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+.day.has-todos {
+  background-color: #d4edda;
+  border-color: #28a745;
+}
+
+.day.has-todos:hover {
+  background-color: #c3e6cb;
+}
+
+.day.has-todos::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #28a745;
+  border-radius: 50%;
+}
+
+.task-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.task-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.task-input input:focus {
+  border-color: #007bff;
+}
+
+.add-task-btn {
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-task-btn:hover {
+  background-color: #0056b3;
+}
+
+.task-list {
+  flex: 1;
+}
+
+.task-list h3 {
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.task-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.task-item.completed {
+  background-color: #f8f9fa;
+  opacity: 0.8;
+}
+
+.progress-bar {
+  position: relative;
+  width: 80px;
+  height: 20px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #007bff;
+  border-radius: 10px;
+  transition: width 0.2s ease;
+}
+
+.progress.completed {
+  background-color: #28a745;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.progress-handle {
+  position: absolute;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border: 2px solid #007bff;
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.progress-handle.completed {
+  border-color: #28a745;
+}
+
+.task-title {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.task-title.completed {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.task-options {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.task-options:hover {
+  background-color: #f8d7da;
+}
+
+.date-selection-guide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #6c757d;
+  text-align: center;
+}
+
+.date-selection-guide h4 {
+  margin-bottom: 8px;
+  color: #495057;
+}
+
+.date-selection-guide p {
+  line-height: 1.5;
+  opacity: 0.8;
+}
+`;
+
+// 해당 날짜가 몇 번째 주차인지 반환 : Date객체 -> number
 const getWeekNumber = (date) => {
   const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const firstDayWeekday = firstDayOfMonth.getDay();
@@ -14,27 +333,25 @@ const getWeekNumber = (date) => {
   return Math.ceil(adjustedDate / 7);
 };
 
+// 시작~종료 날짜 사이의 모든 주차(월 n주차) 목록 반환
 const getWeeksInRange = (startDate, endDate) => {
   const weeks = new Set();
   const current = new Date(startDate);
-  
   while (current <= endDate) {
     const weekNum = getWeekNumber(current);
     const monthName = current.toLocaleDateString('ko-KR', { month: 'long' });
     weeks.add(`${monthName} ${weekNum}주차`);
     current.setDate(current.getDate() + 1);
   }
-  
   return Array.from(weeks);
 };
 
+// 해당 연/월/주차에 포함되는 날짜(일) 배열 반환
 const getDaysInWeek = (year, month, weekNumber) => {
   const firstDay = new Date(year, month - 1, 1);
   const firstDayWeekday = firstDay.getDay();
-  
   const startDate = (weekNumber - 1) * 7 - firstDayWeekday + 1;
   const days = [];
-  
   for (let i = 0; i < 7; i++) {
     const dayDate = startDate + i;
     if (dayDate > 0) {
@@ -44,477 +361,322 @@ const getDaysInWeek = (year, month, weekNumber) => {
       }
     }
   }
-  
   return days;
 };
 
+// date가 startDate~endDate 사이에 포함되는지 여부
 const isDateInRange = (date, startDate, endDate) => {
   return date >= startDate && date <= endDate;
 };
 
-function TodoManager({ subtask, onBack, projectId }) {
-  const [selectedWeek, setSelectedWeek] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [todos, setTodos] = useState({});
-  const [newTodo, setNewTodo] = useState('');
-
-  const startDate = new Date(subtask.startDate);
-  const endDate = new Date(subtask.endDate);
-  const availableWeeks = getWeeksInRange(startDate, endDate);
-
-  // 파이어베이스에서 할일 데이터 실시간 구독
-  useEffect(() => {
-    if (!projectId || !subtask.id) return;
-    const unsubscribe = subscribeToSubtaskTodos(projectId, subtask.id, (todosData) => {
-      setTodos(todosData);
-    });
-    return () => unsubscribe && unsubscribe();
-  }, [projectId, subtask.id]);
-
-  // 컴포넌트가 다시 마운트될 때 마지막 선택된 주차와 날짜 복원
-  useEffect(() => {
-    if (!selectedWeek && projectId && subtask.id) {
-      const storageKey = `todo_selection_${projectId}_${subtask.id}`;
-      const savedSelection = localStorage.getItem(storageKey);
-      
-      if (savedSelection) {
-        try {
-          const { week, date } = JSON.parse(savedSelection);
-          setSelectedWeek(week);
-          setSelectedDate(date);
-        } catch (error) {
-          console.error('저장된 선택 정보 복원 중 오류:', error);
-        }
-      } else if (Object.keys(todos).length > 0) {
-        // 저장된 선택이 없으면 가장 최근에 할일이 있는 날짜를 찾아서 선택
-        const dateKeys = Object.keys(todos).sort((a, b) => parseInt(b) - parseInt(a));
-        if (dateKeys.length > 0) {
-          const lastDate = parseInt(dateKeys[0]);
-          const startDate = new Date(subtask.startDate);
-          const endDate = new Date(subtask.endDate);
-          
-          // 해당 날짜가 속한 주차 찾기
-          const checkDate = new Date(startDate.getFullYear(), startDate.getMonth(), lastDate);
-          if (checkDate >= startDate && checkDate <= endDate) {
-            const weekNumber = getWeekNumber(checkDate);
-            const monthName = checkDate.toLocaleDateString('ko-KR', { month: 'long' });
-            const weekString = `${monthName} ${weekNumber}주차`;
-            
-            setSelectedWeek(weekString);
-            setSelectedDate(lastDate);
-          }
-        }
-      }
+// 할 일(투두) 관리 메인 컴포넌트
+function TodoManager({ subtask, onUpdateSubtask }) {
+  // Firebase Timestamp를 Date로 변환하는 헬퍼 함수
+  const convertToDate = (dateValue) => {
+    if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
+      return dateValue;
+    } else if (typeof dateValue === 'string') {
+      return new Date(dateValue);
+    } else if (dateValue && typeof dateValue.toDate === 'function') {
+      return dateValue.toDate();
+    } else {
+      return new Date();
     }
-  }, [todos, selectedWeek, projectId, subtask.id, subtask.startDate, subtask.endDate]);
+  };
+
+  const startDate = subtask ? new Date(subtask.startDate) : null;
+  const endDate = subtask ? new Date(subtask.endDate) : null;
+  const availableWeeks = subtask ? getWeeksInRange(startDate, endDate) : [];
+  
+  const [selectedWeek, setSelectedWeek] = useState(availableWeeks[0]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [todos, setTodos] = useState(() => {
+    if (!subtask?.todos) return {};
+    const todosByDate = {};
+    subtask.todos.forEach(todo => {
+      const dateKey = todo.date;
+      if (!todosByDate[dateKey]) {
+        todosByDate[dateKey] = [];
+      }
+      todosByDate[dateKey].push(todo);
+    });
+    return todosByDate;
+  });
+  const [newTodo, setNewTodo] = useState('');
 
   const handleWeekSelect = (week) => {
     setSelectedWeek(week);
     setSelectedDate(null);
-    
-    // localStorage에 저장
-    if (projectId && subtask.id) {
-      const storageKey = `todo_selection_${projectId}_${subtask.id}`;
-      localStorage.setItem(storageKey, JSON.stringify({ week, date: null }));
-    }
   };
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
-    
-    // localStorage에 저장
-    if (projectId && subtask.id && selectedWeek) {
-      const storageKey = `todo_selection_${projectId}_${subtask.id}`;
-      localStorage.setItem(storageKey, JSON.stringify({ week: selectedWeek, date }));
-    }
   };
 
-  const addTodo = async () => {
-    if (!newTodo.trim() || !selectedDate || !projectId || !subtask.id) return;
-    
+  const addTodo = () => {
+    if (!newTodo.trim() || !selectedDate) return;
     const dateKey = `${selectedDate}`;
-    const todo = { text: newTodo, completed: false };
-    
-    // 낙관적 업데이트
-    setTodos(prev => ({
-      ...prev,
-      [dateKey]: [...(prev[dateKey] || []), { id: Date.now().toString(), ...todo }]
-    }));
+    const newTodoItem = {
+      id: Date.now(),
+      text: newTodo,
+      progress: 0,
+      date: dateKey
+    };
+
+    const updatedTodos = {
+      ...todos,
+      [dateKey]: [...(todos[dateKey] || []), newTodoItem]
+    };
+
+    setTodos(updatedTodos);
+
+    if (onUpdateSubtask) {
+      const allTodos = Object.values(updatedTodos).flat();
+      const updatedSubtask = {
+        ...subtask,
+        todos: allTodos,
+        deadline: convertToDate(subtask.deadline),
+        startDate: subtask.startDate,
+        endDate: subtask.endDate
+      };
+      onUpdateSubtask(updatedSubtask);
+    }
+
     setNewTodo('');
-    
-    // 파이어베이스에 저장
-    try {
-      await addSubtaskTodo(projectId, subtask.id, dateKey, todo);
-    } catch (error) {
-      console.error('할일 추가 중 오류:', error);
-    }
   };
 
-  const toggleTodo = async (dateKey, todoId) => {
-    if (!projectId || !subtask.id) return;
-    
-    const todo = todos[dateKey]?.find(t => t.id === todoId);
-    if (!todo) return;
-    
-    // 낙관적 업데이트
-    setTodos(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map(t => 
-        t.id === todoId ? { ...t, completed: !t.completed } : t
+  const updateTodoProgress = (dateKey, todoId, newProgress) => {
+    const updatedTodos = {
+      ...todos,
+      [dateKey]: todos[dateKey].map(todo =>
+        todo.id === todoId ? { ...todo, progress: newProgress } : todo
       )
-    }));
-    
-    // 파이어베이스에 저장
-    try {
-      await updateSubtaskTodo(projectId, subtask.id, dateKey, todoId, { completed: !todo.completed });
-    } catch (error) {
-      console.error('할일 상태 변경 중 오류:', error);
+    };
+
+    setTodos(updatedTodos);
+
+    if (onUpdateSubtask) {
+      const allTodos = Object.values(updatedTodos).flat();
+      const updatedSubtask = {
+        ...subtask,
+        todos: allTodos,
+        deadline: convertToDate(subtask.deadline),
+        startDate: subtask.startDate,
+        endDate: subtask.endDate
+      };
+      onUpdateSubtask(updatedSubtask);
     }
   };
 
-  const deleteTodo = async (dateKey, todoId) => {
-    if (!projectId || !subtask.id) return;
-    
-    // 낙관적 업데이트
-    setTodos(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].filter(todo => todo.id !== todoId)
-    }));
-    
-    // 파이어베이스에서 삭제
-    try {
-      await deleteSubtaskTodo(projectId, subtask.id, dateKey, todoId);
-    } catch (error) {
-      console.error('할일 삭제 중 오류:', error);
+  const deleteTodo = (dateKey, todoId) => {
+    const updatedTodos = {
+      ...todos,
+      [dateKey]: todos[dateKey].filter(todo => todo.id !== todoId)
+    };
+
+    setTodos(updatedTodos);
+
+    if (onUpdateSubtask) {
+      const allTodos = Object.values(updatedTodos).flat();
+      const updatedSubtask = {
+        ...subtask,
+        todos: allTodos,
+        deadline: convertToDate(subtask.deadline),
+        startDate: subtask.startDate,
+        endDate: subtask.endDate
+      };
+      onUpdateSubtask(updatedSubtask);
     }
   };
 
   const getWeekDays = () => {
     if (!selectedWeek) return [];
-    
     const weekMatch = selectedWeek.match(/(\d+)월 (\d+)주차/);
     if (!weekMatch) return [];
-    
     const month = parseInt(weekMatch[1]);
     const weekNum = parseInt(weekMatch[2]);
     const year = startDate.getFullYear();
-    
     return getDaysInWeek(year, month, weekNum);
   };
 
   const isDateActive = (day) => {
     const currentMonth = selectedWeek?.match(/(\d+)월/)?.[1];
     if (!currentMonth) return false;
-    
     const checkDate = new Date(startDate.getFullYear(), parseInt(currentMonth) - 1, day);
     return isDateInRange(checkDate, startDate, endDate);
   };
 
-  const hasTodosForDate = (day) => {
-    const dateKey = `${day}`;
-    return todos[dateKey] && todos[dateKey].length > 0;
-  };
-
-  const getCompletedTodosCount = (day) => {
-    const dateKey = `${day}`;
-    if (!todos[dateKey]) return 0;
-    return todos[dateKey].filter(todo => todo.completed).length;
-  };
-
-  const getTotalTodosCount = (day) => {
-    const dateKey = `${day}`;
-    return todos[dateKey] ? todos[dateKey].length : 0;
-  };
-
-  const getWeekTodosInfo = (week) => {
-    const weekMatch = week.match(/(\d+)월 (\d+)주차/);
-    if (!weekMatch) return { hasTodos: false, totalCount: 0, completedCount: 0 };
-    
-    const month = parseInt(weekMatch[1]);
-    const weekNum = parseInt(weekMatch[2]);
-    const year = startDate.getFullYear();
-    const weekDays = getDaysInWeek(year, month, weekNum);
-    
-    let totalCount = 0;
-    let completedCount = 0;
-    let hasTodos = false;
-    
-    weekDays.forEach(day => {
-      const dateKey = `${day}`;
-      if (todos[dateKey]) {
-        hasTodos = true;
-        totalCount += todos[dateKey].length;
-        completedCount += todos[dateKey].filter(todo => todo.completed).length;
-      }
-    });
-    
-    return { hasTodos, totalCount, completedCount };
+  const hasDateTodos = (day) => {
+    return todos[day] && todos[day].length > 0;
   };
 
   const currentTodos = selectedDate ? todos[selectedDate] || [] : [];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <button 
-          onClick={onBack}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginRight: '15px'
-          }}
-        >
-          ← 뒤로가기
-        </button>
-        <h2 style={{ display: 'inline', margin: 0 }}>
-          {subtask.title} 할 일 관리
-        </h2>
-      </div>
-      
-      <div style={{ 
-        background: '#f8f9fa', 
-        padding: '15px', 
-        borderRadius: '8px', 
-        marginBottom: '20px' 
-      }}>
-        <p><strong>기간:</strong> {subtask.startDate} ~ {subtask.endDate}</p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-        {/* 왼쪽: 주차 및 날짜 선택 */}
-        <div>
-          <div style={{ marginBottom: '25px' }}>
-            <h3 style={{ marginBottom: '15px' }}>주차 선택</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {availableWeeks.map(week => {
-                const weekInfo = getWeekTodosInfo(week);
-                const isAllCompleted = weekInfo.hasTodos && weekInfo.completedCount === weekInfo.totalCount;
-                
-                return (
-                  <button
-                    key={week}
-                    onClick={() => handleWeekSelect(week)}
-                    style={{
-                      padding: '12px 24px',
-                      backgroundColor: selectedWeek === week ? '#007bff' : 
-                                     isAllCompleted ? '#d4edda' :
-                                     weekInfo.hasTodos ? '#fff3cd' : '#e9ecef',
-                      color: selectedWeek === week ? 'white' : '#495057',
-                      border: selectedWeek === week ? 'none' : 
-                             weekInfo.hasTodos ? '2px solid #ffc107' : '1px solid #ced4da',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      fontSize: '16px',
-                      transition: 'all 0.2s',
-                      position: 'relative'
-                    }}
-                  >
-                    {week}
-                    {weekInfo.hasTodos && (
-                      <span style={{
-                        position: 'absolute',
-                        top: '-5px',
-                        right: '-5px',
-                        backgroundColor: isAllCompleted ? '#28a745' : '#ffc107',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: '20px',
-                        height: '20px',
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold'
-                      }}>
-                        {weekInfo.completedCount}/{weekInfo.totalCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+    <div className="todo-bar">
+      <style>{styles}</style>
+      <div className="todo-container">
+        {!subtask ? (
+          // 1. 초기 상태 - 세부 프로젝트 선택 안내
+          <div className="placeholder">
+            <svg className="placeholder-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+            </svg>
+            <div className="placeholder-text">세부 프로젝트를 선택해주세요</div>
+            <div className="placeholder-subtext">
+              마인드맵에서 프로젝트를 클릭하면<br/>
+              해당 프로젝트의 할 일을 관리할 수 있습니다
             </div>
           </div>
+        ) : (
+          // 2. 프로젝트 선택됨 - TodoManager 표시
+          <>
+            <div className="todo-header">
+              <div className="todo-title">{subtask.title}</div>
+              <div className="todo-subtitle">
+                {subtask.startDate} ~ {subtask.endDate}
+              </div>
+            </div>
 
-          {selectedWeek && (
-            <div>
-              <h3 style={{ marginBottom: '15px' }}>{selectedWeek} 날짜 선택</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {getWeekDays().map(day => {
-                  const hasTodos = hasTodosForDate(day);
-                  const completedCount = getCompletedTodosCount(day);
-                  const totalCount = getTotalTodosCount(day);
-                  const isAllCompleted = hasTodos && completedCount === totalCount;
+            <div className="calendar-header">
+              <button 
+                className="nav-btn"
+                onClick={() => {
+                  const currentIndex = availableWeeks.findIndex(week => week === selectedWeek);
+                  const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableWeeks.length - 1;
+                  handleWeekSelect(availableWeeks[prevIndex]);
+                }}
+              >
+                ‹
+              </button>
+              <div className="month-year">
+                {selectedWeek || availableWeeks[0]}
+              </div>
+              <button 
+                className="nav-btn"
+                onClick={() => {
+                  const currentIndex = availableWeeks.findIndex(week => week === selectedWeek);
+                  const nextIndex = currentIndex < availableWeeks.length - 1 ? currentIndex + 1 : 0;
+                  handleWeekSelect(availableWeeks[nextIndex]);
+                }}
+              >
+                ›
+              </button>
+            </div>
+
+            {/* 날짜 선택 */}
+            <div className="calendar-days">
+              <div>
+                {getWeekDays().map(day => (
+                  <div
+                    key={day}
+                    onClick={() => isDateActive(day) ? handleDateSelect(day) : null}
+                    className={`day ${selectedDate === day ? 'today' : ''} ${!isDateActive(day) ? 'disabled' : ''} ${hasDateTodos(day) ? 'has-todos' : ''}`}
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 할 일 입력 */}
+            {selectedDate && (
+              <>
+                <div className="task-input">
+                  <input
+                    type="text"
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    placeholder="할 일을 입력하세요"
+                    onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+                  />
+                  <button 
+                    className="add-task-btn"
+                    onClick={addTodo}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 29 29" fill="white">
+                      <path d="M14.5 0v29M0 14.5h29" stroke="white" strokeWidth="2"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* 할 일 목록 */}
+                <div className="task-list">
+                  <h3>
+                    {selectedWeek} {selectedDate}일 할 일
+                  </h3>
                   
-                  return (
-                    <button
-                      key={day}
-                      onClick={() => isDateActive(day) ? handleDateSelect(day) : null}
-                      disabled={!isDateActive(day)}
-                      style={{
-                        padding: '12px 16px',
-                        backgroundColor: selectedDate === day ? '#28a745' : 
-                                       isAllCompleted ? '#d4edda' :
-                                       hasTodos ? '#fff3cd' : 
-                                       isDateActive(day) ? '#e9ecef' : '#f8f9fa',
-                        color: selectedDate === day ? 'white' : 
-                               isDateActive(day) ? '#495057' : '#6c757d',
-                        border: selectedDate === day ? 'none' : 
-                               hasTodos ? '2px solid #ffc107' : '1px solid #ced4da',
-                        borderRadius: '5px',
-                        cursor: isDateActive(day) ? 'pointer' : 'not-allowed',
-                        fontSize: '16px',
-                        transition: 'all 0.2s',
-                        position: 'relative'
-                      }}
-                    >
-                      {day}일
-                      {hasTodos && (
-                        <span style={{
-                          position: 'absolute',
-                          top: '-5px',
-                          right: '-5px',
-                          backgroundColor: isAllCompleted ? '#28a745' : '#ffc107',
-                          color: 'white',
-                          borderRadius: '50%',
-                          width: '20px',
-                          height: '20px',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 'bold'
-                        }}>
-                          {completedCount}/{totalCount}
+                  {currentTodos.length === 0 ? (
+                    <p className="empty-state">
+                      등록된 할 일이 없습니다.
+                    </p>
+                  ) : (
+                    currentTodos.map(todo => (
+                      <div 
+                        key={todo.id} 
+                        className={`task-item ${todo.progress === 100 ? 'completed' : ''}`}
+                      >
+                        <div 
+                          className="progress-bar"
+                          onMouseDown={(e) => {
+                            const progressBar = e.currentTarget;
+                            const rect = progressBar.getBoundingClientRect();
+                            const handleMouseMove = (moveEvent) => {
+                              const x = Math.max(0, Math.min(moveEvent.clientX - rect.left, rect.width));
+                              const percentage = Math.round((x / rect.width) * 100);
+                              updateTodoProgress(selectedDate.toString(), todo.id, percentage);
+                            };
+                            const handleMouseUp = () => {
+                              document.removeEventListener('mousemove', handleMouseMove);
+                              document.removeEventListener('mouseup', handleMouseUp);
+                            };
+                            document.addEventListener('mousemove', handleMouseMove);
+                            document.addEventListener('mouseup', handleMouseUp);
+                            handleMouseMove(e);
+                          }}
+                        >
+                          <div 
+                            className={`progress ${todo.progress === 100 ? 'completed' : ''}`}
+                            style={{ width: `${todo.progress}%` }}
+                          />
+                          <span className="progress-text">
+                            {todo.progress}%
+                          </span>
+                          <div 
+                            className={`progress-handle ${todo.progress === 100 ? 'completed' : ''}`}
+                            style={{ left: `${Math.max(0, Math.min(todo.progress - 1, 99))}%` }}
+                          />
+                        </div>
+                        
+                        <span className={`task-title ${todo.progress === 100 ? 'completed' : ''}`}>
+                          {todo.text}
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+                        
+                        <button 
+                          className="task-options"
+                          onClick={() => deleteTodo(selectedDate.toString(), todo.id)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
 
-        {/* 오른쪽: 할 일 관리 */}
-        <div>
-          {selectedDate ? (
-            <>
-              <h3 style={{ marginBottom: '15px' }}>
-                {selectedWeek} {selectedDate}일 할 일
-              </h3>
-              
-              <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-                <input
-                  type="text"
-                  value={newTodo}
-                  onChange={(e) => setNewTodo(e.target.value)}
-                  placeholder="새로운 할 일을 입력하세요"
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    border: '1px solid #ced4da',
-                    borderRadius: '5px',
-                    fontSize: '16px',
-                    outline: 'none'
-                  }}
-                  onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-                />
-                <button 
-                  onClick={addTodo}
-                  style={{
-                    padding: '12px 20px',
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px'
-                  }}
-                >
-                  추가
-                </button>
+            {/* 날짜 선택 안내 */}
+            {!selectedDate && (
+              <div className="date-selection-guide">
+                <h4>날짜를 선택해주세요</h4>
+                <p>
+                  위에서 날짜를 선택하면<br/>
+                  해당 날짜의 할 일을 관리할 수 있습니다.
+                </p>
               </div>
-
-              <div style={{ 
-                maxHeight: '400px', 
-                overflowY: 'auto',
-                border: '1px solid #dee2e6',
-                borderRadius: '8px',
-                padding: '15px',
-                background: 'white'
-              }}>
-                {currentTodos.length === 0 ? (
-                  <p style={{ color: '#6c757d', fontStyle: 'italic', textAlign: 'center', margin: '20px 0' }}>
-                    등록된 할 일이 없습니다.
-                  </p>
-                ) : (
-                  currentTodos.map(todo => (
-                    <div 
-                      key={todo.id} 
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '12px',
-                        margin: '8px 0',
-                        background: todo.completed ? '#f8f9fa' : 'white',
-                        border: '1px solid #dee2e6',
-                        borderRadius: '5px',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={todo.completed}
-                        onChange={() => toggleTodo(selectedDate.toString(), todo.id)}
-                        style={{ marginRight: '12px', transform: 'scale(1.2)' }}
-                      />
-                      <span 
-                        style={{
-                          flex: 1,
-                          textDecoration: todo.completed ? 'line-through' : 'none',
-                          color: todo.completed ? '#6c757d' : '#212529',
-                          fontSize: '16px'
-                        }}
-                      >
-                        {todo.text}
-                      </span>
-                      <button 
-                        onClick={() => deleteTodo(selectedDate.toString(), todo.id)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          fontSize: '14px'
-                        }}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </>
-          ) : (
-            <div style={{ 
-              padding: '40px', 
-              textAlign: 'center', 
-              color: '#6c757d',
-              background: '#f8f9fa',
-              borderRadius: '8px',
-              border: '2px dashed #dee2e6'
-            }}>
-              <h4 style={{ marginBottom: '10px' }}>날짜를 선택해주세요</h4>
-              <p>왼쪽에서 주차와 날짜를 선택하면<br/>해당 날짜의 할 일을 관리할 수 있습니다.</p>
-            </div>
-          )}
-        </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

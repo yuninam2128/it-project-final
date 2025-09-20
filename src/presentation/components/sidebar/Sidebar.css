@@ -1,0 +1,106 @@
+.sidebar {
+  width: 100%; /* 접힌 상태 너비 */
+  height: 100%;
+  background: #2c2c2c48;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.517);
+}
+
+.sidebar:hover {
+  width: 250px; /* 펼쳐진 상태 너비 */
+  border-radius: 20px;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.game-button {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  color: white;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.game-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.game-button img {
+  width: 24px;
+  height: 24px;
+  min-width: 24px; /* 아이콘이 줄어들지 않도록 */
+  margin-right: 5px;
+}
+
+.game-button p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  margin-left: 15px;
+}
+
+.sidebar:hover .game-button p {
+  opacity: 1;
+}
+
+/* 프로젝트 목록 섹션 */
+.sidebar > div:last-child {
+  margin-top: 30px;
+  padding: 0 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar > div:last-child h3 {
+  color: white;
+  font-size: 16px;
+  margin: 0 0 15px 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.sidebar:hover > div:last-child h3 {
+  opacity: 1;
+}
+
+/* 스크롤바 스타일 */
+.sidebar > div:last-child::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar > div:last-child::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar > div:last-child::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar > div:last-child::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
