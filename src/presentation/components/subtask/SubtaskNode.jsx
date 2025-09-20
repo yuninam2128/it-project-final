@@ -110,7 +110,7 @@ function SubtaskNode({ node, mapOffset, onMove, onClick, onEdit, onDelete }) {
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [dragging, hasMoved, offset]);
+  }, [dragging, onMouseMove, onMouseUp]);
 
   // 노드 크기 계산 (반지름 기반)
   const nodeSize = node.radius ? node.radius * 2 : (node.isCenter ? 120 : 80);

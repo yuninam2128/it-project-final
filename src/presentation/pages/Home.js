@@ -1,6 +1,6 @@
 // Home.jsx
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 // Firebase Timestamp 제거
 import Header from "../components/header/header"; //(명시)
 import ProjectMap from "../components/project/ProjectMap"; // (명시)

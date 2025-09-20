@@ -15,56 +15,14 @@ function ProjectDetail() {
     const {projectId} = useParams();
 
     const [project, setProject] = useState(null);
-    const [currentView, setCurrentView] = useState("mindmap");
     const [selectedSubtask, setSelectedSubtask] = useState(null);
     const [subtaskPositions, setSubtaskPositions] = useState({});
     const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     const [showAddForm, setShowAddForm] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const projectRepository = new FirebaseProjectRepository();
 
-    useEffect(() => {
-        const fetchProject = async () => {
-            try {
-                setLoading(true);
-                const projectData = await projectRepository.getById(projectId);
-                if (projectData) {
-                    // subtasks가 없으면 빈 배열로 초기화
-                    if (!projectData.subtasks) {
-                        projectData.subtasks = [];
-                    }
-                    // 기존 subtask에 todos 속성이 없으면 빈 배열로 초기화
-                    projectData.subtasks = projectData.subtasks.map(subtask => ({
-                        ...subtask,
-                        todos: subtask.todos || []
-                    }));
-                    setProject(projectData);
-                    // console.log("프로젝트 로드됨:", projectData);
-                    // console.log("서브태스크 개수:", projectData.subtasks.length);
-
-                    if (projectData.subtasks.length > 0) {
-                        const initialPositions = generateInitialPositions(projectData.subtasks, canvasSize);
-                        setSubtaskPositions(initialPositions);
-                    }
-                } else {
-                    setError("프로젝트를 찾을 수 없습니다.");
-                }
-            } catch (err) {
-                console.error("프로젝트 데이터 로딩 오류:", err);
-                setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (projectId) {
-            fetchProject();
-        }
-    }, [projectId, canvasSize]);
-
-    //중요도에 따른 원 크기 
+    //중요도에 따른 원 크기
     const getRadius = (priority) => {
         if (priority === "상") return 75;
         if (priority === "중") return 55;
@@ -93,6 +51,39 @@ function ProjectDetail() {
 
         return positions;
     };
+
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const projectData = await projectRepository.getById(projectId);
+                if (projectData) {
+                    // subtasks가 없으면 빈 배열로 초기화
+                    if (!projectData.subtasks) {
+                        projectData.subtasks = [];
+                    }
+                    // 기존 subtask에 todos 속성이 없으면 빈 배열로 초기화
+                    projectData.subtasks = projectData.subtasks.map(subtask => ({
+                        ...subtask,
+                        todos: subtask.todos || []
+                    }));
+                    setProject(projectData);
+                    // console.log("프로젝트 로드됨:", projectData);
+                    // console.log("서브태스크 개수:", projectData.subtasks.length);
+
+                    if (projectData.subtasks.length > 0) {
+                        const initialPositions = generateInitialPositions(projectData.subtasks, canvasSize);
+                        setSubtaskPositions(initialPositions);
+                    }
+                }
+            } catch (err) {
+                console.error("프로젝트 데이터 로딩 오류:", err);
+            }
+        };
+
+        if (projectId) {
+            fetchProject();
+        }
+    }, [projectId, canvasSize, generateInitialPositions, projectRepository]);
 
     //새 위치
     const findAvailablePosition = () => {
@@ -247,11 +238,6 @@ function ProjectDetail() {
         // setCurrentView("todo");
     };
 
-    //뒤로 가기 버튼
-    const handleBackToMindmap = () => {
-        setCurrentView("mindmap");
-        setSelectedSubtask(null);
-    };
 
     //추가 버튼 관리 
     const handleAddClick = () => {
