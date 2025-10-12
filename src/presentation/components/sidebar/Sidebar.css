@@ -1,106 +1,111 @@
+/* Sidebar */
 .sidebar {
-  width: 100%; /* 접힌 상태 너비 */
+  position: relative;
+  z-index: 50;
+  transition: all 0.3s ease-in-out;
+  width: 80px;
+  border-radius: 44px;
+  background: rgba(51, 65, 85, 0.5);
+  backdrop-filter: blur(10px);
+  margin: 20px 0 20px 20px;
+  height: calc(100vh - 40px);
+  flex-shrink: 0;
+}
+
+.sidebar-expanded {
+  width: 280px;
+  border-radius: 45.97px;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  background: #2c2c2c48;
-  transition: width 0.3s ease;
-  overflow: hidden;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 0;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.517);
+  padding: 28px;
 }
 
-.sidebar:hover {
-  width: 250px; /* 펼쳐진 상태 너비 */
-  border-radius: 20px;
-}
-
-.menu-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 10px;
-}
-
-.game-button {
+.sidebar-logo {
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  padding: 12px 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-  color: white;
-  text-align: left;
-  white-space: nowrap;
+  justify-content: center;
 }
 
-.game-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.logo-circle {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: rgb(51, 65, 85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.game-button img {
-  width: 24px;
-  height: 24px;
-  min-width: 24px; /* 아이콘이 줄어들지 않도록 */
-  margin-right: 5px;
+.logo-icon {
+  color: rgb(96, 165, 250);
+  font-size: 1.5rem;
+  width : 30px;
+  height : 30px;
 }
 
-.game-button p {
-  margin: 0;
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  margin-left: 15px;
-}
-
-.sidebar:hover .game-button p {
-  opacity: 1;
-}
-
-/* 프로젝트 목록 섹션 */
-.sidebar > div:last-child {
-  margin-top: 30px;
-  padding: 0 10px;
+/* Navigation */
+.sidebar-nav {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.sidebar > div:last-child h3 {
+.nav-item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-item-inactive {
+  color: rgb(203, 213, 225);
+}
+
+.nav-item-inactive:hover {
   color: white;
-  font-size: 16px;
-  margin: 0 0 15px 0;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
 }
 
-.sidebar:hover > div:last-child h3 {
-  opacity: 1;
+.nav-item-active {
+  color: white;
 }
 
-/* 스크롤바 스타일 */
-.sidebar > div:last-child::-webkit-scrollbar {
-  width: 6px;
+.nav-divider {
+  border-top: 1px solid rgb(71, 85, 105);
+  margin: 1rem 0;
 }
 
-.sidebar > div:last-child::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+/* Profile */
+.sidebar-profile {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.sidebar > div:last-child::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
+.profile-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgb(71, 85, 105);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sidebar > div:last-child::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+.profile-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.profile-upgrade {
+  font-size: 0.75rem;
+  color: rgb(96, 165, 250);
 }
