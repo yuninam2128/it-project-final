@@ -4,7 +4,7 @@ import SubtaskMindmap from "../components/subtask/SubtaskMindmap";
 import SubtaskForm from "../components/subtask/SubtaskForm";
 import "./Detail.css";
 import Header from "../components/header/header";
-import TodoManager from "../components/todo/TodoManager";
+import SubtaskTodoList from "../components/todo/SubtaskTodoList";
 import Sidebar from "../components/sidebar/Sidebar";
 import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
@@ -285,8 +285,9 @@ function ProjectDetail() {
                         onPositionChange={handleSubtaskPositionChange}
                         onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
                     />
-                    <TodoManager
+                    <SubtaskTodoList
                         subtask={selectedSubtask}
+                        projectId={projectId}
                         onUpdateSubtask={handleEditSubtask}
                     />
                 </main>
