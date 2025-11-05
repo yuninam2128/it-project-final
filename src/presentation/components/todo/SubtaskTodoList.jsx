@@ -108,7 +108,7 @@ function SubtaskTodoList({ subtask, onUpdateSubtask }) {
     <div className="subtask-todo-list">
       {/* 1. detail-todo-title 섹션 */}
       <div className="detail-todo-title">
-        <h2 className="detail-todo-title-text">{subtask.name}</h2>
+        <h2 className="detail-todo-title-text">{subtask.title}</h2>
         {startDateStr && endDateStr && (
           <p className="detail-todo-title-date">{startDateStr}~{endDateStr}</p>
         )}

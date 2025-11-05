@@ -6,7 +6,7 @@ import "./Detail.css";
 import Header from "../components/header/header";
 import SubtaskTodoList from "../components/todo/SubtaskTodoList";
 import Sidebar from "../components/sidebar/Sidebar";
-import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
+import { MockProjectRepository } from "../../infrastructure/repositories/MockProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
 
 
@@ -20,7 +20,7 @@ function ProjectDetail() {
     const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     const [showAddForm, setShowAddForm] = useState(false);
 
-    const projectRepository = new FirebaseProjectRepository();
+    const projectRepository = new MockProjectRepository();
 
     //중요도에 따른 원 크기
     const getRadius = (priority) => {

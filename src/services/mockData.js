@@ -26,6 +26,8 @@ export const mockProjects = [
         priority: '상',
         progress: 80,
         deadline: new Date('2025-11-05'),
+        startDate: new Date('2025-10-20'),
+        endDate: new Date('2025-11-05'),
         todos: [
           {
             id: 'todo-1-1-1',
@@ -53,6 +55,8 @@ export const mockProjects = [
         priority: '상',
         progress: 50,
         deadline: new Date('2025-11-10'),
+        startDate: new Date('2025-10-23'),
+        endDate: new Date('2025-11-10'),
         todos: [
           {
             id: 'todo-1-2-1',
@@ -74,6 +78,8 @@ export const mockProjects = [
         priority: '중',
         progress: 30,
         deadline: new Date('2025-11-12'),
+        startDate: new Date('2025-10-25'),
+        endDate: new Date('2025-11-12'),
         todos: []
       }
     ],
@@ -96,6 +102,8 @@ export const mockProjects = [
         priority: '중',
         progress: 60,
         deadline: new Date('2025-11-20'),
+        startDate: new Date('2025-10-25'),
+        endDate: new Date('2025-11-20'),
         todos: [
           {
             id: 'todo-2-1-1',
@@ -117,6 +125,8 @@ export const mockProjects = [
         priority: '하',
         progress: 20,
         deadline: new Date('2025-11-25'),
+        startDate: new Date('2025-11-01'),
+        endDate: new Date('2025-11-25'),
         todos: []
       }
     ],
@@ -139,6 +149,8 @@ export const mockProjects = [
         priority: '하',
         progress: 80,
         deadline: new Date('2025-11-30'),
+        startDate: new Date('2025-10-20'),
+        endDate: new Date('2025-11-30'),
         todos: [
           {
             id: 'todo-3-1-1',
@@ -179,6 +191,8 @@ export const loadMockData = () => {
         subtasks: project.subtasks.map(subtask => ({
           ...subtask,
           deadline: new Date(subtask.deadline),
+          startDate: subtask.startDate ? new Date(subtask.startDate) : null,
+          endDate: subtask.endDate ? new Date(subtask.endDate) : null,
           todos: subtask.todos || []
         }))
       }));
