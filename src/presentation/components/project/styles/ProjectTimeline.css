@@ -1,56 +1,96 @@
-/* ProjectTimeline.css - 날짜 디버깅용 */
+/* ProjectTimeline.css - 피그마 디자인 정확 반영 */
 .simple-timeline {
+  flex: 1;
+  min-height: 0;
   position: relative;
   width: 100%;
-  height: 100%; /* 높이 증가 */
-  background: linear-gradient(135deg,#3c3477b0, #7a89a5);
-  border: none;
+  height: 100%;
+  /* 위 #3C49A6 → 아래 #171C40 */
+  background: linear-gradient(180deg, #3C49A6 0%, #171C40 100%);
+  border: 1px solid #989898;
   margin: 0;
-  align-items: center;
-  justify-content: center;
   box-sizing: border-box;
-  padding: auto;
-  box-shadow: inset 0 0 25px rgba(162, 172, 255, 0.962);
+  padding: 0 40px;
+  border-radius: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: visible;
 }
 
 .simple-line {
   position: absolute;
   top: 50%;
-  left: 20px;
-  right: 20px;
-  height: 2px;
-  background: #edededc6;
+  left: 40px;
+  right: 40px;
+  height: 1px;
+  background: white;
+  border-radius: 0;
+  transform: translateY(-50%);
 }
 
 .simple-dot {
   position: absolute;
-  top: 43%; /* 라인 위에 정확히 위치 */
-  width: 20px;
-  height: 20px;
+  top: 50%;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  transform: translateX(-50%);
-  color: white;
+  transform: translate(-50%, -50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 10px;
   z-index: 10;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  color: white;
+  font-weight: 400;
+  font-family: 'Pretendard', sans-serif;
+  flex-shrink: 0;
+  line-height: 1.2;
+  text-align: center;
+  /* D-day 텍스트를 점 위에 표시하기 위해 position 조정 */
+  overflow: visible;
 }
 
-/* 진행 상태별 색상 */
+/* D-day 텍스트를 점 상단에 위치 */
+.simple-dot::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: white;
+  font-weight: 400;
+  white-space: nowrap;
+  z-index: 11;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.simple-dot:hover {
+  width: 50px;
+  height: 50px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  filter: brightness(1.2);
+}
+
+/* 진행 상태별 색상 - 피그마 디자인 */
 .simple-dot.normal {
-  background: rgb(149, 216, 255); /* 정상 진행 */
+  background: #609eff; /* 파랑 - 정상 진행 */
 }
 
 .simple-dot.warning {
-  background: rgb(252, 255, 154); /* 60% 이상 */
+  background: #fcff9a; /* 노랑 - 중간 진행 */
+  /* 노랑 배경에서 텍스트가 보이도록 색상 변경 */
+  color: #333 !important;
 }
 
 .simple-dot.danger {
-  background: #ff91ca; /* 80% 이상 */
+  background: #f6717a; /* 빨강 - 긴급 */
 }
 
 .simple-dot.overdue {
-  background: gray; /* 마감 초과 */
+  background: #8a8a8a; /* 회색 - 마감 초과 */
 }

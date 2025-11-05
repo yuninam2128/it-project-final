@@ -46,10 +46,11 @@
  .main-content {
   flex: 1;
   padding: 2rem;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  gap: 1rem;
 }
 
 
@@ -106,31 +107,6 @@
   padding: 15px;
 }
 
-/* 타임라인 컨테이너 - 고정 높이 */
-.timeline-footer {
-  height: 140px; /* 고정 높이 */
-  padding: 0; /* 내부 컴포넌트에서 패딩 처리 */
-  background: linear-gradient(180deg, rgba(41, 41, 136, 0.575), rgba(44, 41, 255, 0.788));
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.517);
-  border-radius: 20px;
-  box-sizing: border-box;
-  overflow: hidden;
-  gap: 0px;
-}
-
-.timeline h3 {
-  margin: 0 0 10px 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-}
-
-/* Title Section */
-.title-section {
-  margin-bottom: 1rem;
-  flex-shrink: 0;
-}
-
 .date-text {
   font-size: 0.875rem;
   color: rgb(148, 163, 184);
@@ -146,12 +122,12 @@
   color: rgb(96, 165, 250);
 }
 
-/* Content Grid */
+/* Content Grid - 3:1 비율 (content-grid:timeline = 3:1) */
 .content-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
-  flex: 1;
+  flex: 3.5;
   min-height: 0;
 }
 
