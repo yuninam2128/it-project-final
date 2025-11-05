@@ -8,10 +8,8 @@ import Sidebar from "../components/sidebar/Sidebar";
 import Inspiration from "../components/inspiration/Inspiration";
 import ProjectTimeline from "../components/project/ProjectTimeline";
 import ProjectForm from "../components/project/ProjectForm";
-import "./Home.css"
-
-// Mock 데이터 사용 (Firebase 연결 제거)
-// Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변경
+import "./Home.css";
+import TodaysTodo from "../components/todo/TodaysTodo";
 import { subscribeAuth, getCurrentUserDisplayName } from '../../services/mockAuth';
 import {
   createProject,
@@ -20,6 +18,9 @@ import {
   updateProjectPosition,
   subscribeToUserProjects
 } from '../../services/mockProjects';
+
+// Mock 데이터 사용 (Firebase 연결 제거)
+// Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변경
 
 function Home() {
   const [projects, setProjects] = useState([]); //현재 사용자 프로젝트 리스트 저장
@@ -91,7 +92,7 @@ function Home() {
     return 40;
   };
 
-  //프로젝트 추가 
+  //프로젝트 추가
   const handleAddProject = async (newProject) => {
     if (!currentUser) {
       alert('로그인이 필요합니다.');
@@ -104,12 +105,20 @@ function Home() {
       const radius = getRadius(newProject.priority);
       const padding = 20;
       const tryLimit = 500;
-      
-      // 맵 영역만 고려 (사이드바 제외)
-      const mapWidth = window.innerWidth - 300; // 사이드바 너비 300px
-      const screenHeight = window.innerHeight;
+
+      // 실제 project-map-container 크기를 기반으로 계산
+      const mapContainer = document.querySelector('.space-map-container > .project-map-container');
+      let mapWidth = window.innerWidth - 300; // 기본값 (사이드바 너비 300px)
+      let mapHeight = window.innerHeight - 400; // 기본값 (헤더, 타임라인 등 제외)
+
+      if (mapContainer) {
+        const rect = mapContainer.getBoundingClientRect();
+        mapWidth = rect.width;
+        mapHeight = rect.height;
+      }
+
       const centerX = mapWidth / 2;
-      const centerY = screenHeight / 2;
+      const centerY = mapHeight / 2;
 
       let x = 0;
       let y = 0;
@@ -126,7 +135,7 @@ function Home() {
       };
 
       const isWithinMapArea = (cx, cy, r) => {
-        return cx - r >= 0 && cx + r <= mapWidth && cy - r >= 0 && cy + r <= screenHeight;
+        return cx - r >= 0 && cx + r <= mapWidth && cy - r >= 0 && cy + r <= mapHeight;
       };
 
       const numExisting = Object.keys(positions).length;
@@ -137,8 +146,8 @@ function Home() {
         y = centerY;
         placed = true;
       } else {
-        //기존 프로젝트 주위에 배치 시도 
-        const maxDistance = Math.max(mapWidth, screenHeight);
+        //기존 프로젝트 주위에 배치 시도
+        const maxDistance = Math.max(mapWidth, mapHeight);
         const step = radius + padding;
         
         for (let distance = step; distance <= maxDistance && !placed && attempt < tryLimit; distance += step) {
@@ -166,14 +175,14 @@ function Home() {
           }
         }
         
-        // 그래도 실패하면 격자 방식으로 탐색 
+        // 그래도 실패하면 격자 방식으로 탐색
         if (!placed) {
           const gridSize = Math.min(radius * 2 + padding, 50);
-          
+
           for (let gx = radius; gx <= mapWidth - radius && !placed && attempt < tryLimit; gx += gridSize) {
-            for (let gy = radius; gy <= screenHeight - radius && !placed && attempt < tryLimit; gy += gridSize) {
+            for (let gy = radius; gy <= mapHeight - radius && !placed && attempt < tryLimit; gy += gridSize) {
               attempt++;
-              
+
               if (!isOverlapping(gx, gy, radius, positions)) {
                 x = gx;
                 y = gy;
@@ -183,13 +192,13 @@ function Home() {
             }
           }
         }
-        
-        // 최후 수단 : 랜덤 배치 
+
+        // 최후 수단 : 랜덤 배치
         if (!placed) {
           const maxRandomAttempts = 200;
           for (let i = 0; i < maxRandomAttempts && !placed; i++) {
             const rx = radius + Math.random() * (mapWidth - 2 * radius);
-            const ry = radius + Math.random() * (screenHeight - 2 * radius);
+            const ry = radius + Math.random() * (mapHeight - 2 * radius);
             
             if (!isOverlapping(rx, ry, radius, positions)) {
               x = rx;
@@ -389,7 +398,7 @@ function Home() {
         {/* Right Sidebar */}
         <div className="right-sidebar">
           {/* Today's Tasks */}
-            <TodoList projects={projects} onUpdateProject={handleUpdateProject} />
+            <TodaysTodo/>
           {/* Inspiration Card */}
           <div className="card card-inspiration">
             <Inspiration />

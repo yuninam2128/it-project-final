@@ -1,6 +1,8 @@
 /* TodaysTodo.css - Figma 디자인 기반 */
 
 .todays-todo {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   height: 100%;
