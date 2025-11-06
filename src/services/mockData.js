@@ -28,26 +28,35 @@ export const mockProjects = [
         deadline: new Date('2025-11-05'),
         startDate: new Date('2025-10-20'),
         endDate: new Date('2025-11-05'),
-        todos: [
-          {
-            id: 'todo-1-1-1',
-            text: '와이어프레임 작성',
-            completed: true,
-            createdAt: new Date('2025-10-20')
-          },
-          {
-            id: 'todo-1-1-2',
-            text: '컬러 팔레트 선정',
-            completed: true,
-            createdAt: new Date('2025-10-21')
-          },
-          {
-            id: 'todo-1-1-3',
-            text: 'Figma 디자인 완성',
-            completed: false,
-            createdAt: new Date('2025-10-22')
-          }
-        ]
+        todos: {
+          '2025-10-20': [
+            {
+              id: 'todo-1-1-1',
+              text: '와이어프레임 작성',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-20')
+            }
+          ],
+          '2025-10-21': [
+            {
+              id: 'todo-1-1-2',
+              text: '컬러 팔레트 선정',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-21')
+            }
+          ],
+          '2025-10-22': [
+            {
+              id: 'todo-1-1-3',
+              text: 'Figma 디자인 완성',
+              progress: 0,
+              completed: false,
+              createdAt: new Date('2025-10-22')
+            }
+          ]
+        }
       },
       {
         id: 'subtask-1-2',
@@ -57,20 +66,26 @@ export const mockProjects = [
         deadline: new Date('2025-11-10'),
         startDate: new Date('2025-10-23'),
         endDate: new Date('2025-11-10'),
-        todos: [
-          {
-            id: 'todo-1-2-1',
-            text: 'React 프로젝트 세팅',
-            completed: true,
-            createdAt: new Date('2025-10-23')
-          },
-          {
-            id: 'todo-1-2-2',
-            text: '메인 페이지 구현',
-            completed: false,
-            createdAt: new Date('2025-10-24')
-          }
-        ]
+        todos: {
+          '2025-10-23': [
+            {
+              id: 'todo-1-2-1',
+              text: 'React 프로젝트 세팅',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-23')
+            }
+          ],
+          '2025-10-24': [
+            {
+              id: 'todo-1-2-2',
+              text: '메인 페이지 구현',
+              progress: 0,
+              completed: false,
+              createdAt: new Date('2025-10-24')
+            }
+          ]
+        }
       },
       {
         id: 'subtask-1-3',
@@ -104,20 +119,26 @@ export const mockProjects = [
         deadline: new Date('2025-11-20'),
         startDate: new Date('2025-10-25'),
         endDate: new Date('2025-11-20'),
-        todos: [
-          {
-            id: 'todo-2-1-1',
-            text: '스택/큐 문제 10개',
-            completed: true,
-            createdAt: new Date('2025-10-25')
-          },
-          {
-            id: 'todo-2-1-2',
-            text: '트리 순회 문제 5개',
-            completed: false,
-            createdAt: new Date('2025-10-26')
-          }
-        ]
+        todos: {
+          '2025-10-25': [
+            {
+              id: 'todo-2-1-1',
+              text: '스택/큐 문제 10개',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-25')
+            }
+          ],
+          '2025-10-26': [
+            {
+              id: 'todo-2-1-2',
+              text: '트리 순회 문제 5개',
+              progress: 0,
+              completed: false,
+              createdAt: new Date('2025-10-26')
+            }
+          ]
+        }
       },
       {
         id: 'subtask-2-2',
@@ -151,20 +172,26 @@ export const mockProjects = [
         deadline: new Date('2025-11-30'),
         startDate: new Date('2025-10-20'),
         endDate: new Date('2025-11-30'),
-        todos: [
-          {
-            id: 'todo-3-1-1',
-            text: '인사 표현 암기',
-            completed: true,
-            createdAt: new Date('2025-10-20')
-          },
-          {
-            id: 'todo-3-1-2',
-            text: '날씨 관련 대화 연습',
-            completed: true,
-            createdAt: new Date('2025-10-22')
-          }
-        ]
+        todos: {
+          '2025-10-20': [
+            {
+              id: 'todo-3-1-1',
+              text: '인사 표현 암기',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-20')
+            }
+          ],
+          '2025-10-22': [
+            {
+              id: 'todo-3-1-2',
+              text: '날씨 관련 대화 연습',
+              progress: 100,
+              completed: true,
+              createdAt: new Date('2025-10-22')
+            }
+          ]
+        }
       }
     ],
     createdAt: new Date('2025-10-10'),

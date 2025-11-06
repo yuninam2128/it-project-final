@@ -86,8 +86,13 @@
   transition: opacity 0.2s ease;
 }
 
-.week-select-arrow:hover {
+.week-select-arrow:hover:not(:disabled) {
   opacity: 0.8;
+}
+
+.week-select-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .week-select-arrow svg {
@@ -209,6 +214,22 @@
 
 .day.day-selected:hover .day-number {
   background: linear-gradient(135deg, rgba(98, 109, 191, 1) 0%, rgba(120, 130, 200, 1) 100%);
+}
+
+/* day-disabled: 비활성화된 날짜 (범위 밖) */
+.day.day-disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.day.day-disabled .day-number {
+  background: rgba(52, 57, 93, 1);
+  color: rgba(67, 71, 107, 1);
+}
+
+.day.day-disabled:hover .day-number {
+  background: rgba(52, 57, 93, 1);
+  color: rgba(67, 71, 107, 1);
 }
 
 /* ===== 5. detail-todo-content (투두 입력 + 리스트) ===== */
