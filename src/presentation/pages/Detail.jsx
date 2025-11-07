@@ -318,40 +318,44 @@ function ProjectDetail() {
 
 
   return (
-    <div className="App">
-    <div className="body-detail">
-        <div className="container-detail">
-                <Sidebar />
-
-            <div className="main-wrapper-detail">
-                <Header onAddClick={handleAddClick} jellies={jellies} />    
-                <article className="main-article-detail">
-                        <div className="date-detail">{formatted}</div>
-                        <div className="title-detail">
-                            <span className="highlight-detail">{project.title}</span>의 행성들을 정복해보아요!
-                        </div>
-                </article>
-                <main className="content-area-detail">
-                    <SubtaskMindmap
-                        project ={project}
-                        positions={subtaskPositions}
-                        onSubtaskClick={handleSubtaskClick}
-                        onEditSubtask={handleEditSubtask}
-                        onDeleteSubtask={handleDeleteSubtask}
-                        onPositionChange={handleSubtaskPositionChange}
-                        onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
-                    />
+    <div className="app-container">
+      <Sidebar/>
+      <div className="main-content">
+        <Header />
+        {/* Date and Title */}
+        <div className="title-section">
+            <div className="date-text">2025년 09월 10일</div>
+            <h1 className="main-title">
+            남지윤님, <span className="title-highlight">오늘은 어떤 우주를 정복해볼까요?</span>
+            </h1>
+        </div>
+        <div className="content-grid">
+            <div className="space-map-container">
+                <SubtaskMindmap
+                    project ={project}
+                    positions={subtaskPositions}
+                    onSubtaskClick={handleSubtaskClick}
+                    onEditSubtask={handleEditSubtask}
+                    onDeleteSubtask={handleDeleteSubtask}
+                    onPositionChange={handleSubtaskPositionChange}
+                    onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
+                />
+            </div>
+            <div className="right-sidebar">
+                <div className="card card-todo-expanded">
                     <SubtaskTodoList
                         subtask={selectedSubtask}
                         projectId={projectId}
                         onUpdateSubtask={handleEditSubtask}
                         onJellyReward={handleJellyReward}
                     />
-                </main>
-                <footer className="timeline-detail">
-                    <ProjectTimeline />
-                </footer>
-                {showAddForm && (
+                </div>
+            </div>
+        </div>
+                <ProjectTimeline />
+
+      </div>
+                 {showAddForm && (
                     <SubtaskForm
                     onSubmit={(newSubtask) => {
                         handleAddSubtask(newSubtask);
@@ -367,11 +371,62 @@ function ProjectDetail() {
                         onClose={() => setJellyReward(null)}
                     />
                 )}
-            </div>
-        </div>
-    </div>
     </div>
   );
 }
 
 export default ProjectDetail;
+
+    // <div className="App">
+    // <div className="body-detail">
+    //     <div className="container-detail">
+    //             <Sidebar />
+
+    //         <div className="main-wrapper-detail">
+    //             <Header onAddClick={handleAddClick} jellies={jellies} />    
+    //             <article className="main-article-detail">
+    //                     <div className="date-detail">{formatted}</div>
+    //                     <div className="title-detail">
+    //                         <span className="highlight-detail">{project.title}</span>의 행성들을 정복해보아요!
+    //                     </div>
+    //             </article>
+    //             <main className="content-area-detail">
+    //                 <SubtaskMindmap
+    //                     project ={project}
+    //                     positions={subtaskPositions}
+    //                     onSubtaskClick={handleSubtaskClick}
+    //                     onEditSubtask={handleEditSubtask}
+    //                     onDeleteSubtask={handleDeleteSubtask}
+    //                     onPositionChange={handleSubtaskPositionChange}
+    //                     onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
+    //                 />
+    //                 <SubtaskTodoList
+    //                     subtask={selectedSubtask}
+    //                     projectId={projectId}
+    //                     onUpdateSubtask={handleEditSubtask}
+    //                     onJellyReward={handleJellyReward}
+    //                 />
+    //             </main>
+    //             <footer className="timeline-detail">
+    //                 <ProjectTimeline />
+    //             </footer>
+    //             {showAddForm && (
+    //                 <SubtaskForm
+    //                 onSubmit={(newSubtask) => {
+    //                     handleAddSubtask(newSubtask);
+    //                     setShowAddForm(false);
+    //                 }}
+    //                 onClose={handleFormClose}
+    //                 />
+
+    //             )}
+    //             {jellyReward && (
+    //                 <JellyRewardPopup
+    //                     rewards={jellyReward}
+    //                     onClose={() => setJellyReward(null)}
+    //                 />
+    //             )}
+    //         </div>
+    //     </div>
+    // </div>
+    // </div>

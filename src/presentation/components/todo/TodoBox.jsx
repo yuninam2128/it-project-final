@@ -102,11 +102,11 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
       )}
 
       {/* 투두 아이템 목록 */}
-      <div className="todo-items-section">
+      <div className="todo-task-list">
         {todos.length === 0 ? (
           <p className="empty-state">할 일을 추가해보세요 👋</p>
         ) : (
-          <ul className="todo-items-list">
+          <ul className="todo-items-list"> {/* todo-items-list*/}
             {todos.map(todo => (
               <TodoItem
                 key={todo.id}
