@@ -1,14 +1,10 @@
 import TodoBox from "./TodoBox";
 import "./TodaysTodo.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function TodaysTodo({ todos = [], onUpdateTodos, date = new Date() }) {
-  const getDateKey = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const currentDateKey = getDateKey(date);
-
+function TodaysTodo({ todos, onUpdateTodos, currentDate }) {
+  const currentDateKey = currentDate;
+  console.log(todos);
   // 예시 투두 리스트 (첫 렌더링 시에만 사용)
   const defaultTodos = [
     { id: 1, text: "프로젝트 기획서 작성", progress: 100, date: currentDateKey, completed: true },
@@ -23,9 +19,18 @@ function TodaysTodo({ todos = [], onUpdateTodos, date = new Date() }) {
     { id: 10, text: "내일 일정 계획", progress: 0, date: currentDateKey, completed: false }
   ];
 
-  const [todosState, setTodosState] = useState(todos.length === 0 ? defaultTodos : todos);
+  const [todosState, setTodosState] = useState(todos || []);
+
+  // todos prop이 변경될 때마다 todosState 업데이트
+  useEffect(() => {
+    setTodosState(todos || []);
+  }, [todos]);
 
   const todayTodos = todosState.filter(todo => todo.date === currentDateKey);
+  console.log(`currentDateKey:`, currentDateKey);
+  console.log(`todos:`, todos);
+  console.log(`todosState:`, todosState);
+  console.log(`todayTodos:`, todayTodos);
   const completedCount = todayTodos.filter(todo => todo.progress === 100).length;
 
   const handleUpdateTodos = (updatedTodos) => {

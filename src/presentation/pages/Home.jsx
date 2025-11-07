@@ -350,10 +350,13 @@ function Home() {
     setJellies(newJellies);
   };
 
-  // 오늘 날짜 문자열 반환 (YYYY-MM-DD)
+  // 오늘 날짜 문자열 반환 (YYYY-MM-DD) - 로컬 시간대 기준
   const getCurrentDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // 로딩 중일 때
@@ -369,6 +372,38 @@ function Home() {
   if (!currentUser) {
     return null; // 이미 navigate('/')로 리다이렉트됨
   }
+
+  // //todays todos 받기
+  // const allTodos = projects.subtasks.flatMap((subtask) =>
+  //   Object.entries(subtask.todos).flatMap(([date, todos]) =>
+  //     todos.map((todo) => ({
+  //       id: todo.id,
+  //       text: todo.text,
+  //       progress: todo.progress,
+  //       date,
+  //       completed: todo.completed,
+  //     }))
+  //   )
+  // );
+  const allTodos =
+  projects?.flatMap((project) =>
+    project?.subtasks?.flatMap((subtask) =>
+      Object.entries(subtask?.todos ?? {}).flatMap(([date, todos]) =>
+        todos.map((todo) => ({
+          id: todo.id,
+          text: todo.text,
+          progress: todo.progress,
+          date,
+          completed: todo.completed,
+          projectId: project.id,
+          subtaskId: subtask.id,
+        }))
+      )
+    ) ?? []
+  ) ?? [];
+  console.log(`projects:`, projects);
+  console.log(`allTodos:`, allTodos);
+  console.log(`today:`, getCurrentDate());
 
   return ( 
     <div className="app-container">
@@ -416,7 +451,7 @@ function Home() {
         {/* Right Sidebar */}
         <div className="right-sidebar">
           {/* Today's Tasks */}
-            <TodaysTodo/>
+            <TodaysTodo todos={allTodos} currentDate={getCurrentDate()} />
           {/* Inspiration Card */}
           <div className="card card-inspiration">
             <Inspiration />
