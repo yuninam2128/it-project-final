@@ -11,10 +11,13 @@
 export const getHeartJellyAmount = (level) => {
   switch (level) {
     case 'todo':
+      console.log('[젤리보상] 하트젤리(투두): 100개');
       return 100;
     case 'subtask':
+      console.log('[젤리보상] 하트젤리(세부프로젝트): 500개');
       return 500;
     case 'project':
+      console.log('[젤리보상] 하트젤리(메인프로젝트): 1000개');
       return 1000;
     default:
       return 0;
@@ -29,10 +32,13 @@ export const getHeartJellyAmount = (level) => {
  */
 export const getStarJellyReward = (completionCount, level) => {
   // 5의 배수인지 확인 (5, 10, 15, ...)
+  console.log(`[젤리보상] 별젤리 마일스톤 확인 - 현재 완료 횟수: ${completionCount}`);
   if (completionCount % 5 === 0) {
+    console.log(`[젤리보상] ✨ 마일스톤 달성! ${completionCount}회 완료 (${level})`);
     const starAmount = getHeartJellyAmount(level); // 별 젤리는 하트와 같은 개수
     return { isMilestone: true, amount: starAmount };
   }
+  console.log(`[젤리보상] 별젤리 마일스톤 미달성 - ${completionCount}회는 5의 배수가 아님`);
   return { isMilestone: false, amount: 0 };
 };
 

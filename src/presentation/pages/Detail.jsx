@@ -26,7 +26,16 @@ function ProjectDetail() {
 
     // 젤리 획득 처리 함수
     const handleJellyReward = (rewards) => {
-      if (!rewards || rewards.length === 0) return;
+      console.log('[Detail.jsx] handleJellyReward 호출:', {
+        rewards,
+        rewardsLength: rewards?.length,
+        isEmpty: !rewards || rewards.length === 0
+      });
+      if (!rewards || rewards.length === 0) {
+        console.log('[Detail.jsx] rewards가 비어있음 - return');
+        return;
+      }
+      console.log('[Detail.jsx] setJellyReward 실행:', rewards);
       setJellyReward(rewards);
     };
 

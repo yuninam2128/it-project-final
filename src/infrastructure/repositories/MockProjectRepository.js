@@ -37,7 +37,7 @@ export class MockProjectRepository {
         saveMockData(this.projects);
         this.notifyListeners();
 
-        console.log('✅ MockRepo: 프로젝트 생성됨');
+        // console.log('✅ MockRepo: 프로젝트 생성됨');
         resolve(newProject);
       }, 200);
     });
@@ -47,7 +47,7 @@ export class MockProjectRepository {
     return new Promise((resolve) => {
       setTimeout(() => {
         const project = this.projects.find(p => p.id === id);
-        console.log('✅ MockRepo: 프로젝트 조회:', id);
+        // console.log('✅ MockRepo: 프로젝트 조회:', id);
         resolve(project || null);
       }, 150);
     });
@@ -65,7 +65,7 @@ export class MockProjectRepository {
           }
         });
 
-        console.log('✅ MockRepo: 사용자 프로젝트 조회:', projects.length, '개');
+        // console.log('✅ MockRepo: 사용자 프로젝트 조회:', projects.length, '개');
         resolve({ projects, positions });
       }, 200);
     });
@@ -84,7 +84,7 @@ export class MockProjectRepository {
           saveMockData(this.projects);
           this.notifyListeners();
 
-          console.log('✅ MockRepo: 프로젝트 수정됨:', id);
+          // console.log('✅ MockRepo: 프로젝트 수정됨:', id);
         }
         resolve();
       }, 150);
@@ -105,7 +105,7 @@ export class MockProjectRepository {
           saveMockData(this.projects);
           this.notifyListeners();
 
-          console.log('✅ MockRepo: 위치 업데이트:', id);
+          // console.log('✅ MockRepo: 위치 업데이트:', id);
         }
         resolve();
       }, 100);
@@ -125,7 +125,7 @@ export class MockProjectRepository {
         saveMockData(this.projects);
         this.notifyListeners();
 
-        console.log('✅ MockRepo: 여러 위치 업데이트');
+        // console.log('✅ MockRepo: 여러 위치 업데이트');
         resolve();
       }, 150);
     });
@@ -138,14 +138,14 @@ export class MockProjectRepository {
         saveMockData(this.projects);
         this.notifyListeners();
 
-        console.log('✅ MockRepo: 프로젝트 삭제됨:', id);
+        // console.log('✅ MockRepo: 프로젝트 삭제됨:', id);
         resolve();
       }, 150);
     });
   }
 
   subscribeToUserProjects(userId, callback) {
-    console.log('✅ MockRepo: 실시간 구독 시작:', userId);
+    // console.log('✅ MockRepo: 실시간 구독 시작:', userId);
 
     this.listeners.push(callback);
 
@@ -166,7 +166,7 @@ export class MockProjectRepository {
     // 구독 해제 함수
     return () => {
       this.listeners = this.listeners.filter(cb => cb !== callback);
-      console.log('✅ MockRepo: 구독 해제');
+      // console.log('✅ MockRepo: 구독 해제');
     };
   }
 }

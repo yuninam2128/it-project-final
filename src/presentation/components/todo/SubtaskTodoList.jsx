@@ -219,8 +219,17 @@ function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
 
     // 투두 완료 보상 계산
     const todoRewards = calculateTodoReward(completedTodo, updatedTodos, subtask, new Date());
+    console.log('[SubtaskTodoList] 투두 완료 핸들러 호출:', {
+      todoId,
+      todoRewards,
+      onJellyRewardExists: !!onJellyReward,
+      rewardsLength: todoRewards.length
+    });
     if (todoRewards.length > 0 && onJellyReward) {
+      console.log('[SubtaskTodoList] onJellyReward 콜백 실행:', todoRewards);
       onJellyReward(todoRewards);
+    } else {
+      console.log('[SubtaskTodoList] onJellyReward 콜백 미실행 - rewards empty or callback missing');
     }
 
     // 세부프로젝트가 완료되었는지 확인

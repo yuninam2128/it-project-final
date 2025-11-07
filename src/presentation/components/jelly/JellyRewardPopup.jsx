@@ -7,21 +7,38 @@ import './JellyRewardPopup.css';
  * @param {function} onClose - 팝업 닫기 콜백
  */
 function JellyRewardPopup({ rewards = [], onClose }) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // 3초 후 자동으로 팝업 닫기
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      onClose && onClose();
-    }, 3000);
+    // rewards가 있을 때만 팝업 표시
+    if (rewards && rewards.length > 0) {
+      setIsVisible(true);
 
-    return () => clearTimeout(timer);
-  }, [onClose]);
+      // 3초 후 자동으로 팝업 닫기
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        onClose && onClose();
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [rewards, onClose]);
 
   if (!isVisible || !rewards || rewards.length === 0) {
+    console.log('[JellyRewardPopup] return null 조건 만족:', {
+      isVisible,
+      rewardsExists: !!rewards,
+      rewardsLength: rewards?.length
+    });
     return null;
   }
+
+  // 팝업 닫기 함수
+  const handleClosePopup = () => {
+    console.log('[JellyRewardPopup] 팝업 닫기 - 오버레이 클릭');
+    setIsVisible(false);
+    onClose && onClose();
+  };
 
   // 젤리 타입별 아이콘 경로
   const jellyIcons = {
@@ -38,7 +55,7 @@ function JellyRewardPopup({ rewards = [], onClose }) {
   };
 
   return (
-    <div className="jelly-reward-popup-overlay" onClick={() => setIsVisible(false)}>
+    <div className="jelly-reward-popup-overlay" onClick={handleClosePopup}>
       <div className="jelly-reward-popup" onClick={(e) => e.stopPropagation()}>
         {/* 여러 개의 젤리 보상이 있으면 각각 표시 */}
         <div className="jelly-rewards-container">
