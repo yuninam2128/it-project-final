@@ -321,7 +321,7 @@ function ProjectDetail() {
     <div className="app-container">
       <Sidebar/>
       <div className="main-content">
-        <Header />
+        <Header onAddClick={handleAddClick} jellies={jellies}/>
         {/* Date and Title */}
         <div className="title-section">
             <div className="date-text">2025년 09월 10일</div>
