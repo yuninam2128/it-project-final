@@ -31,9 +31,9 @@ export const getHeartJellyAmount = (level) => {
  * @returns {object} { isMilestone: boolean, amount: number }
  */
 export const getStarJellyReward = (completionCount, level) => {
-  // 5의 배수인지 확인 (5, 10, 15, ...)
+  // 5의 배수이고 0이 아닌지 확인 (5, 10, 15, ...)
   console.log(`[젤리보상] 별젤리 마일스톤 확인 - 현재 완료 횟수: ${completionCount}`);
-  if (completionCount % 5 === 0) {
+  if (completionCount > 0 && completionCount % 5 === 0) {
     console.log(`[젤리보상] ✨ 마일스톤 달성! ${completionCount}회 완료 (${level})`);
     const starAmount = getHeartJellyAmount(level); // 별 젤리는 하트와 같은 개수
     return { isMilestone: true, amount: starAmount };
@@ -194,33 +194,25 @@ export const calculateProjectReward = (project, allProjects, today = new Date())
 };
 
 /**
- * 세부프로젝트가 완료되었는지 확인 (모든 투두가 100%)
+ * 세부프로젝트가 완료되었는지 확인 (세부프로젝트의 progress가 100%)
  * @param {object} subtask - 세부프로젝트
  * @returns {boolean}
  */
 export const isSubtaskComplete = (subtask) => {
-  if (!subtask || !subtask.todos) return false;
+  if (!subtask) return false;
 
-  // todos가 객체 형태 { "YYYY-MM-DD": [todos] }
-  if (typeof subtask.todos === 'object' && !Array.isArray(subtask.todos)) {
-    const allTodos = Object.values(subtask.todos).flat();
-    return allTodos.length > 0 && allTodos.every(todo => todo.progress === 100);
-  }
-
-  // todos가 배열 형태
-  if (Array.isArray(subtask.todos)) {
-    return subtask.todos.length > 0 && subtask.todos.every(todo => todo.progress === 100);
-  }
-
-  return false;
+  // 세부프로젝트 자체의 진행도가 100인지 확인
+  return subtask.progress === 100;
 };
 
 /**
- * 메인프로젝트가 완료되었는지 확인 (모든 세부프로젝트의 모든 투두가 100%)
+ * 메인프로젝트가 완료되었는지 확인 (메인프로젝트의 progress가 100%)
  * @param {object} project - 메인프로젝트
  * @returns {boolean}
  */
 export const isProjectComplete = (project) => {
-  if (!project || !project.subtasks || project.subtasks.length === 0) return false;
-  return project.subtasks.every(subtask => isSubtaskComplete(subtask));
+  if (!project) return false;
+
+  // 메인프로젝트 자체의 진행도가 100인지 확인
+  return project.progress === 100;
 };

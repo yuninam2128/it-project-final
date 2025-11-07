@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import TodoBox from "./TodoBox";
 import "./SubtaskTodoList.css";
-import { calculateTodoReward, calculateSubtaskReward, isSubtaskComplete } from "../../../utils/jellyRewardCalculator";
+import { calculateTodoReward, calculateSubtaskReward } from "../../../utils/jellyRewardCalculator";
 
 function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
   const [todos, setTodos] = useState([]);
@@ -225,22 +225,35 @@ function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
       onJellyRewardExists: !!onJellyReward,
       rewardsLength: todoRewards.length
     });
-    if (todoRewards.length > 0 && onJellyReward) {
-      console.log('[SubtaskTodoList] onJellyReward 콜백 실행:', todoRewards);
-      onJellyReward(todoRewards);
-    } else {
-      console.log('[SubtaskTodoList] onJellyReward 콜백 미실행 - rewards empty or callback missing');
-    }
 
     // 세부프로젝트가 완료되었는지 확인
-    const allTodosComplete = updatedTodos.every(todo => todo.progress === 100);
-    if (allTodosComplete && !wasSubtaskComplete) {
+    // 1. 현재 보이는 todos의 모든 항목이 완료됨
+    // 2. subtask.progress가 100임 (세부프로젝트 자체의 진행도)
+    // const allTodosComplete = updatedTodos.every(todo => todo.progress === 100);
+    const subtaskProgressComplete = subtask.progress === 100;
+    let allRewards = [...todoRewards];
+
+    if (subtaskProgressComplete && !wasSubtaskComplete) {
       // 세부프로젝트 완료 보상 계산
       const subtaskRewards = calculateSubtaskReward(subtask, [subtask], null, new Date());
-      if (subtaskRewards.length > 0 && onJellyReward) {
-        onJellyReward(subtaskRewards);
-      }
+      console.log('[SubtaskTodoList] 세부프로젝트 완료 보상:', {
+        subtaskRewards,
+        rewardsLength: subtaskRewards.length
+      });
+      allRewards = [...allRewards, ...subtaskRewards];
       setWasSubtaskComplete(true);
+    }
+
+    // 모든 보상을 한 번에 콜백 (중복 호출 방지)
+    if (allRewards.length > 0 && onJellyReward) {
+      console.log('[SubtaskTodoList] 최종 보상 콜백 실행 (통합):', {
+        todoId,
+        totalRewards: allRewards,
+        totalRewardsCount: allRewards.length
+      });
+      onJellyReward(allRewards, todoId);  // todoId도 함께 전달
+    } else {
+      console.log('[SubtaskTodoList] 콜백 미실행 - rewards empty or callback missing');
     }
   };
 
