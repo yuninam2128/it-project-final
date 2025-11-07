@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TodoItem from "./TodoItem";
 import "./TodoBox.css";
 
-function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate = new Date() }) {
+function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate = new Date(), mode = 'today', onEditText, onTodoComplete }) {
   const [newTodoText, setNewTodoText] = useState("");
 
   const completedCount = todos.filter(todo => todo.progress === 100).length;
@@ -10,6 +10,7 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
   const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   const updateTodoProgress = (todoId, newProgress) => {
+    const oldTodo = todos.find(todo => todo.id === todoId);
     const updatedTodos = todos.map(todo =>
       todo.id === todoId
         ? { ...todo, progress: newProgress, completed: newProgress === 100 }
@@ -18,6 +19,11 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
 
     if (onUpdateTodos) {
       onUpdateTodos(updatedTodos);
+    }
+
+    // 투두가 완료되었을 때 콜백 실행
+    if (oldTodo && newProgress === 100 && oldTodo.progress !== 100 && onTodoComplete) {
+      onTodoComplete(todoId, updatedTodos);
     }
   };
 
@@ -55,6 +61,7 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
       text: newTodoText,
       progress: 0,
       date: dateKey,
+      createdAt: selectedDate,
       completed: false
     };
 
@@ -104,9 +111,11 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
               <TodoItem
                 key={todo.id}
                 todo={todo}
+                mode={mode}
                 onUpdateProgress={updateTodoProgress}
                 onDelete={deleteTodo}
                 onPostpone={postponeTodo}
+                onEditText={onEditText}
               />
             ))}
           </ul>

@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import TodoBox from "./TodoBox";
 import "./SubtaskTodoList.css";
+import { calculateTodoReward, calculateSubtaskReward, isSubtaskComplete } from "../../../utils/jellyRewardCalculator";
 
-function SubtaskTodoList({ subtask, onUpdateSubtask }) {
+function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
   const [todos, setTodos] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // 0~11
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // 0~4 (주차 인덱스)
+  const [wasSubtaskComplete, setWasSubtaskComplete] = useState(false); // 세부프로젝트 완료 상태 추적
 
   // 날짜를 YYYY-MM-DD 형식으로 변환
   const formatDate = (date) => {
@@ -201,6 +203,38 @@ function SubtaskTodoList({ subtask, onUpdateSubtask }) {
     }
   };
 
+  // text 수정 핸들러
+  const handleEditText = (todoId, newText) => {
+    const updatedTodos = todos.map(todo =>
+      todo.id === todoId ? { ...todo, text: newText } : todo
+    );
+    handleUpdateTodos(updatedTodos);
+  };
+
+  // 투두 완료 핸들러
+  const handleTodoComplete = (todoId, updatedTodos) => {
+    // 완료된 투두 찾기
+    const completedTodo = updatedTodos.find(t => t.id === todoId);
+    if (!completedTodo) return;
+
+    // 투두 완료 보상 계산
+    const todoRewards = calculateTodoReward(completedTodo, updatedTodos, subtask, new Date());
+    if (todoRewards.length > 0 && onJellyReward) {
+      onJellyReward(todoRewards);
+    }
+
+    // 세부프로젝트가 완료되었는지 확인
+    const allTodosComplete = updatedTodos.every(todo => todo.progress === 100);
+    if (allTodosComplete && !wasSubtaskComplete) {
+      // 세부프로젝트 완료 보상 계산
+      const subtaskRewards = calculateSubtaskReward(subtask, [subtask], null, new Date());
+      if (subtaskRewards.length > 0 && onJellyReward) {
+        onJellyReward(subtaskRewards);
+      }
+      setWasSubtaskComplete(true);
+    }
+  };
+
   // 날짜 선택 (범위 내일 때만 가능)
   const handleDateSelect = (date) => {
     if (isDateInRange(date)) {
@@ -311,6 +345,9 @@ function SubtaskTodoList({ subtask, onUpdateSubtask }) {
           onUpdateTodos={handleUpdateTodos}
           showAddInput={true}
           selectedDate={selectedDate}
+          mode="subtask"
+          onEditText={handleEditText}
+          onTodoComplete={handleTodoComplete}
         />
       </div>
     </div>

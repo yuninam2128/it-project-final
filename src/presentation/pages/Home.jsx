@@ -8,6 +8,7 @@ import Sidebar from "../components/sidebar/Sidebar";
 import Inspiration from "../components/inspiration/Inspiration";
 import ProjectTimeline from "../components/project/ProjectTimeline";
 import ProjectForm from "../components/project/ProjectForm";
+import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import "./Home.css";
 import TodaysTodo from "../components/todo/TodaysTodo";
 import { subscribeAuth, getCurrentUserDisplayName } from '../../services/mockAuth';
@@ -31,6 +32,8 @@ function Home() {
   const navigate = useNavigate(); //페이지 이동 함수
   const [displayName, setDisplayName] = useState(''); //이름 가져오는 중인지 여부
   const [isLoadingName, setIsLoadingName] = useState(true);
+  const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수
+  const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
   // const today = getCurrentDate(); // 오늘 날짜 변수
 
   //로그인 상태 구독
@@ -326,6 +329,27 @@ function Home() {
     }
   };
 
+  // 젤리 획득 처리 함수
+  const handleJellyReward = (rewards) => {
+    if (!rewards || rewards.length === 0) return;
+
+    // 팝업 표시
+    setJellyReward(rewards);
+
+    // 젤리 개수 업데이트
+    const newJellies = { ...jellies };
+    rewards.forEach(reward => {
+      if (reward.type === 'heart') {
+        newJellies.heart += reward.amount;
+      } else if (reward.type === 'star') {
+        newJellies.light += reward.amount; // 별 젤리는 light로 관리
+      } else if (reward.type === 'fire') {
+        newJellies.fire += reward.amount;
+      }
+    });
+    setJellies(newJellies);
+  };
+
   // 오늘 날짜 문자열 반환 (YYYY-MM-DD)
   const getCurrentDate = () => {
     const today = new Date();
@@ -354,7 +378,8 @@ function Home() {
             isLoadingName={isLoadingName}
             displayName={displayName}
             currentDate={getCurrentDate()}
-            onAddClick={() => setShowForm(true)} 
+            onAddClick={() => setShowForm(true)}
+            jellies={jellies}
         />
       {/* Date and Title */}
       <div className="title-section">
@@ -385,13 +410,6 @@ function Home() {
                 onEditProject={editProject}
                 onPositionsChange={handlePositionChange}
               />
-            
-              {showForm && (
-                <ProjectForm
-                  onSubmit={handleAddProject}
-                  onClose={() => setShowForm(false)}
-                />
-              )}
           </div>
         </div>
 
@@ -406,60 +424,20 @@ function Home() {
         </div>
       </div>
         <ProjectTimeline projects= {projects}/>
+              {showForm && (
+                <ProjectForm
+                  onSubmit={handleAddProject}
+                  onClose={() => setShowForm(false)}
+                />
+              )}
+              {jellyReward && (
+                <JellyRewardPopup
+                  rewards={jellyReward}
+                  onClose={() => setJellyReward(null)}
+                />
+              )}
       </div>
     </div>
-
-    // <div className="game-container">
-    //   <div className="sidebar-container">
-    //     <Sidebar />
-    //   </div>
-
-    //   <div className="main-content">
-    //     <header className="main-header">
-    //       <Header 
-    //         isLoadingName={isLoadingName}
-    //         displayName={displayName}
-    //         currentDate={getCurrentDate()}
-    //         onAddClick={() => setShowForm(true)}
-    //       />
-    //       <div className="main-header-info">
-    //         <h1>{displayName}님, 오늘은 어떤 우주를 정복해볼까요?</h1>
-    //       </div>
-    //     </header>
-
-    //     <div className="workspace">
-    //       <div className="project-map-container">
-    //         <ProjectMap
-    //           projects={projects}
-    //           positions={positions}
-    //           onDeleteProject={deleteProject}
-    //           onEditProject={editProject}
-    //           onPositionsChange={handlePositionChange}
-    //         />
-          
-    //         {showForm && (
-    //           <ProjectForm
-    //             onSubmit={handleAddProject}
-    //             onClose={() => setShowForm(false)}
-    //           />
-    //         )}
-    //       </div>
-    //       <div className="right-pannel">
-    //         <div className="todo">
-    //           <h3>오늘의 할 일</h3>
-    //           <TodoList/>
-    //         </div>
-    //         <div className="inspiration">
-    //           <Inspiration />
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //     <footer className="timeline-footer">
-    //       <ProjectTimeline projects={projects} />
-    //     </footer>
-    //   </div>
-    // </div>
   );
 }
 

@@ -5,6 +5,7 @@ import SubtaskForm from "../components/subtask/SubtaskForm";
 import "./Detail.css";
 import Header from "../components/header/header";
 import SubtaskTodoList from "../components/todo/SubtaskTodoList";
+import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import Sidebar from "../components/sidebar/Sidebar";
 import { MockProjectRepository } from "../../infrastructure/repositories/MockProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
@@ -19,8 +20,15 @@ function ProjectDetail() {
     const [subtaskPositions, setSubtaskPositions] = useState({});
     const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     const [showAddForm, setShowAddForm] = useState(false);
+    const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
 
     const projectRepository = new MockProjectRepository();
+
+    // 젤리 획득 처리 함수
+    const handleJellyReward = (rewards) => {
+      if (!rewards || rewards.length === 0) return;
+      setJellyReward(rewards);
+    };
 
     //중요도에 따른 원 크기
     const getRadius = (priority) => {
@@ -289,6 +297,7 @@ function ProjectDetail() {
                         subtask={selectedSubtask}
                         projectId={projectId}
                         onUpdateSubtask={handleEditSubtask}
+                        onJellyReward={handleJellyReward}
                     />
                 </main>
                 <footer className="timeline-detail">
@@ -303,6 +312,12 @@ function ProjectDetail() {
                     onClose={handleFormClose}
                     />
 
+                )}
+                {jellyReward && (
+                    <JellyRewardPopup
+                        rewards={jellyReward}
+                        onClose={() => setJellyReward(null)}
+                    />
                 )}
             </div>
         </div>

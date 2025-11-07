@@ -1,19 +1,17 @@
 import "./header.css";
 import React, { useState, useEffect } from "react";
 
-function Header({ onAddClick }) {
-  const [fire, setFire] = useState(0);
-  const [heart, setHeart] = useState(0);
-  const [light, setLight] = useState(0);
+function Header({ onAddClick, jellies = { fire: 0, heart: 0, light: 0 } }) {
+  const [fire, setFire] = useState(jellies.fire || 0);
+  const [heart, setHeart] = useState(jellies.heart || 0);
+  const [light, setLight] = useState(jellies.light || 0);
 
   useEffect(() => {
-    // Firebase 흉내내기 → setTimeout으로 데이터 가져오는 것처럼
-    setTimeout(() => {
-      setFire(1000);
-      setHeart(2000);
-      setLight(3000);
-    }, 1000);
-  }, []);
+    // jellies props가 전달되면 업데이트
+    setFire(jellies.fire || 0);
+    setHeart(jellies.heart || 0);
+    setLight(jellies.light || 0);
+  }, [jellies]);
 
   return (
     <div className ="header">

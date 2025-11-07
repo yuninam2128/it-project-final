@@ -44,7 +44,7 @@ function TodaysTodo({ todos = [], onUpdateTodos, date = new Date() }) {
         </div>
       </div>
 
-      <TodoBox todos={todayTodos} onUpdateTodos={handleUpdateTodos} />
+      <TodoBox todos={todayTodos} onUpdateTodos={handleUpdateTodos} mode="today" />
     </div>
   );
 }

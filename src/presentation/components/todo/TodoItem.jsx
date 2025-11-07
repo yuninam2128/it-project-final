@@ -1,8 +1,10 @@
 import { useState } from "react";
 import "./TodoItem.css";
 
-function TodoItem({ todo, onUpdateProgress, onDelete, onPostpone }) {
+function TodoItem({ todo, onUpdateProgress, onDelete, onPostpone, mode = 'today', onEditText }) {
   const [, setHoveredTodoId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
 
   const handleProgressChange = (e) => {
     const progressBar = e.currentTarget;
@@ -27,6 +29,26 @@ function TodoItem({ todo, onUpdateProgress, onDelete, onPostpone }) {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     handleMouseMove(e);
+  };
+
+  const handleEditSave = () => {
+    if (editText.trim() && onEditText) {
+      onEditText(todo.id, editText);
+    }
+    setIsEditing(false);
+  };
+
+  const handleEditCancel = () => {
+    setEditText(todo.text);
+    setIsEditing(false);
+  };
+
+  const handleEditKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleEditSave();
+    } else if (e.key === 'Escape') {
+      handleEditCancel();
+    }
   };
 
   return (
@@ -54,28 +76,79 @@ function TodoItem({ todo, onUpdateProgress, onDelete, onPostpone }) {
           </div>
 
           <div className="todo-text-wrapper">
-            <span className={`todo-text ${todo.progress === 100 ? 'completed' : ''}`}>
-              {todo.text}
-            </span>
-            {todo.progress === 100 && <span className="todo-badge">완료</span>}
+            {isEditing && mode === 'subtask' ? (
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onKeyDown={handleEditKeyPress}
+                autoFocus
+                className="todo-edit-input"
+              />
+            ) : (
+              <>
+                <span className={`todo-text ${todo.progress === 100 ? 'completed' : ''}`}>
+                  {todo.text}
+                </span>
+                {todo.progress === 100 && <span className="todo-badge">완료</span>}
+              </>
+            )}
           </div>
         </div>
 
         <div className="todo-buttons">
-          <button
-            className="todo-postpone-btn"
-            onClick={() => onPostpone && onPostpone(todo.id)}
-            title="다음 날짜로 이동"
-          >
-            →
-          </button>
-          <button
-            className="todo-delete-btn"
-            onClick={() => onDelete(todo.id)}
-            title="삭제"
-          >
-            ✕
-          </button>
+          {isEditing && mode === 'subtask' ? (
+            <>
+              <button
+                className="todo-save-btn"
+                onClick={handleEditSave}
+                title="저장"
+              >
+                ✓
+              </button>
+              <button
+                className="todo-cancel-btn"
+                onClick={handleEditCancel}
+                title="취소"
+              >
+                ✕
+              </button>
+            </>
+          ) : mode === 'subtask' ? (
+            <>
+              <button
+                className="todo-edit-btn"
+                onClick={() => setIsEditing(true)}
+                title="text 수정"
+              >
+                ✎
+              </button>
+              <button
+                className="todo-delete-btn"
+                onClick={() => onDelete(todo.id)}
+                title="삭제"
+              >
+                ✕
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="todo-postpone-btn"
+                onClick={() => onPostpone && onPostpone(todo.id)}
+                title="다음 날짜로 이동"
+              >
+                →
+              </button>
+              <button
+                className="todo-delete-btn"
+                onClick={() => onDelete(todo.id)}
+                title="삭제"
+              >
+                ✕
+              </button>
+            </>
+          )}
         </div>
       </div>
     </li>

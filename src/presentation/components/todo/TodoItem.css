@@ -167,6 +167,70 @@
   transform: scale(0.95);
 }
 
+/* Text 수정 관련 스타일 */
+.todo-edit-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9375rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.todo-edit-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.todo-edit-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.todo-edit-btn,
+.todo-save-btn,
+.todo-cancel-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 0.375rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.todo-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.todo-save-btn:hover {
+  background: rgba(34, 197, 94, 0.6);
+}
+
+.todo-cancel-btn:hover {
+  background: rgba(255, 59, 48, 0.6);
+}
+
+.todo-edit-btn:active,
+.todo-save-btn:active,
+.todo-cancel-btn:active {
+  transform: scale(0.95);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .todo-item {
