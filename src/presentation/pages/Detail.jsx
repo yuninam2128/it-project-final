@@ -10,6 +10,8 @@ import TodoManager from "../components/todo/TodoManager";
 import Sidebar from "../components/sidebar/Sidebar";
 import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
+import { subscribeAuth } from "../../services/auth";
+import { getUserCoins, setUserCoins } from "../../services/coins";
 
 
 
@@ -23,9 +25,18 @@ function ProjectDetail() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
     const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수 상태
+    const [currentUser, setCurrentUser] = useState(null); // 현재 사용자
 
     const projectRepository = new FirebaseProjectRepository();
     //const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
+
+    // 현재 사용자 구독
+    useEffect(() => {
+        const unsubscribe = subscribeAuth((user) => {
+            setCurrentUser(user);
+        });
+        return () => unsubscribe();
+    }, []);
     
         // 젤리 보상 타입을 상태 속성으로 매핑
     const mapRewardTypeToStateProperty = (type) => {
@@ -37,49 +48,74 @@ function ProjectDetail() {
       return typeMap[type] || type;
     };
 
+    // 젤리 보상 타입을 Firebase 필드명으로 매핑
+    const mapRewardTypeToFirebaseField = (type) => {
+      const typeMap = {
+        'heart': 'heartJelly',
+        'fire': 'fireJelly',
+        'star': 'lightJelly'  // star 타입을 lightJelly로 변환
+      };
+      return typeMap[type] || null;
+    };
+
     // 젤리 획득 처리 함수 (useCallback으로 메모이제이션 + 중복 방지)
-    const handleJellyReward = useCallback((rewards, todoId) => {
+    const handleJellyReward = useCallback(async (rewards, todoId) => {
       console.log('[Detail.jsx] handleJellyReward 호출:', {
         todoId,
         rewards,
         rewardsLength: rewards?.length,
-        isEmpty: !rewards || rewards.length === 0
+        isEmpty: !rewards || rewards.length === 0,
+        currentUser: currentUser?.uid
       });
       if (!rewards || rewards.length === 0) {
         console.log('[Detail.jsx] rewards가 비어있음 - return');
         return;
       }
 
-      /*
-      // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
-      if (todoId && processedTodoIdsRef.current.has(todoId)) {
-        console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+      if (!currentUser) {
+        console.warn('[Detail.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
+        // 로그인하지 않아도 팝업은 표시
+        setJellyReward(rewards);
         return;
       }
 
-      // 처리한 TodoId 저장
-      if (todoId) {
-        processedTodoIdsRef.current.add(todoId);
-        console.log(`[Detail.jsx] TodoId ${todoId} 저장됨. 현재 처리된 Todo: ${Array.from(processedTodoIdsRef.current).join(', ')}`);
-      }
-      */
+      try {
+        // 현재 사용자의 젤리 보유 수 가져오기
+        const currentCoins = await getUserCoins(currentUser.uid);
+        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
 
-      // 젤리 카운트 업데이트 (타입 매핑 적용) - 먼저 실행
-      setJellies(prev => {
-        const updated = { ...prev };
+        // 보상만큼 더하기
+        const updatedCoins = { ...currentCoins };
         rewards.forEach(reward => {
-          const stateProperty = mapRewardTypeToStateProperty(reward.type);
-          updated[stateProperty] = (updated[stateProperty] || 0) + reward.amount;
-          console.log(`[Detail.jsx] 젤리 업데이트: ${reward.type}(${reward.amount}) -> ${stateProperty}`);
+          const fieldName = mapRewardTypeToFirebaseField(reward.type);
+          if (fieldName) {
+            updatedCoins[fieldName] = (updatedCoins[fieldName] || 0) + reward.amount;
+            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${reward.amount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+          }
         });
-        console.log('[Detail.jsx] 업데이트된 jellies state:', updated);
-        return updated;
-      });
 
-      // 팝업 표시는 별도로 - 이것이 리렌더링을 트리거할 수 있으므로 마지막에
+        // Firebase에 저장
+        await setUserCoins(currentUser.uid, updatedCoins);
+        console.log('[Detail.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+
+        // 로컬 state도 업데이트 (UI 반응성 향상)
+        setJellies(prev => {
+          const updated = { ...prev };
+          rewards.forEach(reward => {
+            const stateProperty = mapRewardTypeToStateProperty(reward.type);
+            updated[stateProperty] = (updated[stateProperty] || 0) + reward.amount;
+          });
+          return updated;
+        });
+      } catch (error) {
+        console.error('[Detail.jsx] 젤리 저장 중 오류:', error);
+        // 오류가 발생해도 팝업은 표시
+      }
+
+      // 팝업 표시
       console.log('[Detail.jsx] setJellyReward 실행:', rewards);
       setJellyReward(rewards);
-    }, []);
+    }, [currentUser]);
 
 
     //중요도에 따른 원 크기

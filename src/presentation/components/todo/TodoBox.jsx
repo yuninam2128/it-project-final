@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TodoItem from "./TodoItem";
 import "./TodoBox.css";
 
-function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate = new Date(), mode = 'today', onEditText, onTodoComplete }) {
+function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate = new Date(), mode = 'today', onEditText, onTodoComplete, onAddTodo, onUpdateProgress, onDeleteTodo }) {
   const [newTodoText, setNewTodoText] = useState("");
 
   const completedCount = todos.filter(todo => todo.progress === 100).length;
@@ -17,7 +17,10 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
         : todo
     );
 
-    if (onUpdateTodos) {
+    // Firebase 함수가 제공되면 사용, 아니면 기존 방식
+    if (onUpdateProgress) {
+      onUpdateProgress(todoId, newProgress);
+    } else if (onUpdateTodos) {
       onUpdateTodos(updatedTodos);
     }
 
@@ -28,10 +31,14 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
   };
 
   const deleteTodo = (todoId) => {
-    const updatedTodos = todos.filter(todo => todo.id !== todoId);
-
-    if (onUpdateTodos) {
-      onUpdateTodos(updatedTodos);
+    // Firebase 함수가 제공되면 사용, 아니면 기존 방식
+    if (onDeleteTodo) {
+      onDeleteTodo(todoId);
+    } else {
+      const updatedTodos = todos.filter(todo => todo.id !== todoId);
+      if (onUpdateTodos) {
+        onUpdateTodos(updatedTodos);
+      }
     }
   };
 
@@ -52,7 +59,7 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
     }
   };
 
-  const addNewTodo = () => {
+  const addNewTodo = async () => {
     if (!newTodoText.trim()) return;
 
     const dateKey = selectedDate.toISOString().split('T')[0];
@@ -65,11 +72,16 @@ function TodoBox({ todos = [], onUpdateTodos, showAddInput = false, selectedDate
       completed: false
     };
 
-    const updatedTodos = [...todos, newTodo];
-    setNewTodoText("");
-
-    if (onUpdateTodos) {
-      onUpdateTodos(updatedTodos);
+    // Firebase 함수가 제공되면 사용, 아니면 기존 방식
+    if (onAddTodo) {
+      await onAddTodo(newTodo);
+      setNewTodoText("");
+    } else {
+      const updatedTodos = [...todos, newTodo];
+      setNewTodoText("");
+      if (onUpdateTodos) {
+        onUpdateTodos(updatedTodos);
+      }
     }
   };
 
