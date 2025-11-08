@@ -80,8 +80,8 @@ function LoginPage() {
               <input 
                 type="checkbox" 
                 className="checkbox" 
-                checked={keepLoggedIn}
-                onChange={(e) => setKeepLoggedIn(e.target.checked)}
+                //checked={keepLoggedIn}
+                //onChange={(e) => setKeepLoggedIn(e.target.checked)}
               />
               <span>로그인 유지</span>
             </label>
