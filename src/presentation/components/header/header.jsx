@@ -1,17 +1,34 @@
 import "./header.css";
 import React, { useState, useEffect } from "react";
+import { subscribeAuth } from "../../../services/auth";
+import { subscribeUserCoins } from "../../../services/coins";
 
-function Header({ onAddClick, jellies = { fire: 0, heart: 0, light: 0 } }) {
-  const [fire, setFire] = useState(jellies.fire || 0);
-  const [heart, setHeart] = useState(jellies.heart || 0);
-  const [light, setLight] = useState(jellies.light || 0);
+function Header({ onAddClick }) {
+  const [fire, setFire] = useState(1000);
+  const [heart, setHeart] = useState(2000);
+  const [light, setLight] = useState(3000);
+  const [currentUser, setCurrentUser] = useState(null);
 
+  // 사용자 인증 상태 구독
   useEffect(() => {
-    // jellies props가 전달되면 업데이트
-    setFire(jellies.fire || 0);
-    setHeart(jellies.heart || 0);
-    setLight(jellies.light || 0);
-  }, [jellies]);
+    const unsubscribe = subscribeAuth((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 젤리 코인 실시간 구독
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const unsubscribe = subscribeUserCoins(currentUser.uid, (coins) => {
+      setFire(coins.fireJelly || 1000);
+      setHeart(coins.heartJelly || 2000);
+      setLight(coins.lightJelly || 3000);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
 
   return (
     <div className ="header">

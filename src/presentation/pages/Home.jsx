@@ -1,39 +1,36 @@
 // Home.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/header/header";
-import ProjectMap from "../components/project/ProjectMap";
-import TodoList from "../components/todo/TodoList";
-import Sidebar from "../components/sidebar/Sidebar";
-import Inspiration from "../components/inspiration/Inspiration";
-import ProjectTimeline from "../components/project/ProjectTimeline";
-import ProjectForm from "../components/project/ProjectForm";
-import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
-import "./Home.css";
-import TodaysTodo from "../components/todo/TodaysTodo";
-import { subscribeAuth, getCurrentUserDisplayName } from '../../services/mockAuth';
-import {
+// Firebase Timestamp 제거
+import Header from "../components/header/header"; //(명시)
+import ProjectMap from "../components/project/ProjectMap"; // (명시)
+import TodoList from "../components/todo/TodoList"; //(명시)
+import Sidebar from "../components/sidebar/Sidebar"; //(명시)
+import Inspiration from "../components/inspiration/Inspiration"; //(명시)
+import ProjectTimeline from "../components/project/ProjectTimeline"; //(명시)
+//import TodaysTodo from "../components/todo/TodaysTodo";
+import ProjectForm from "../components/project/ProjectForm"; // (팝업)
+
+import "./Home.css"
+import { subscribeAuth, getCurrentUserDisplayName } from '../../services/auth';
+
+import { 
   createProject,
   updateProject,
   deleteProject as deleteProjectFromDB,
   updateProjectPosition,
   subscribeToUserProjects
-} from '../../services/mockProjects';
-
-// Mock 데이터 사용 (Firebase 연결 제거)
-// Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변경
+} from '../../services/projects';
 
 function Home() {
   const [projects, setProjects] = useState([]); //현재 사용자 프로젝트 리스트 저장
   const [showForm, setShowForm] = useState(false); //프로젝트 추가 폼 모달 표시 여부
   const [positions, setPositions] = useState({}); //프로젝트 위치 정보
   const [currentUser, setCurrentUser] = useState(null); //현재 로그인한 사용자 정보
-  const [isLoading, setIsLoading] = useState(true); //로딩 여부 상태
-  const navigate = useNavigate(); //페이지 이동 함수
-  const [displayName, setDisplayName] = useState(''); //이름 가져오는 중인지 여부
+  const [isLoading, setIsLoading] = useState(true); //로딩 여부 상태 
+  const navigate = useNavigate(); //페이지 이동 함수 
+  const [displayName, setDisplayName] = useState(''); //이름 가져오는 중인지 여부 
   const [isLoadingName, setIsLoadingName] = useState(true);
-  const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수
-  const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
   // const today = getCurrentDate(); // 오늘 날짜 변수
 
   //로그인 상태 구독
@@ -42,7 +39,7 @@ function Home() {
       console.log('Auth state changed:', user);
       setCurrentUser(user);
       
-      if (user) {
+      if (user) { 
         setIsLoadingName(true);
         try {
           const name = await getCurrentUserDisplayName();
@@ -59,7 +56,7 @@ function Home() {
         setIsLoadingName(false);
         setProjects([]);
         setPositions({});
-        navigate('/');
+        // App.js에서 라우팅을 처리하므로 navigate 제거
       }
       setIsLoading(false);
     });
@@ -69,15 +66,22 @@ function Home() {
 
   // 사용자의 프로젝트 실시간 구독
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('currentUser가 없어서 프로젝트 구독을 시작하지 않습니다.');
+      setProjects([]);
+      setPositions({});
+      return;
+    }
 
     console.log('프로젝트 실시간 구독 시작:', currentUser.uid);
-
+    
     const unsubscribe = subscribeToUserProjects(currentUser.uid, ({ projects: userProjects, positions: userPositions }) => {
-      console.log('프로젝트 데이터 업데이트:', userProjects, userPositions);
-
-      // Firebase Timestamp 관련 로깅 제거
-
+      console.log('=== 프로젝트 데이터 업데이트 ===');
+      console.log('프로젝트 개수:', userProjects.length);
+      console.log('위치 개수:', Object.keys(userPositions).length);
+      console.log('프로젝트 목록:', userProjects.map(p => ({ id: p.id, title: p.title, hasPosition: !!userPositions[p.id] })));
+      console.log('위치 정보:', userPositions);
+      
       setProjects(userProjects);
       setPositions(userPositions);
     });
@@ -95,7 +99,7 @@ function Home() {
     return 40;
   };
 
-  //프로젝트 추가
+  //프로젝트 추가 
   const handleAddProject = async (newProject) => {
     if (!currentUser) {
       alert('로그인이 필요합니다.');
@@ -108,20 +112,12 @@ function Home() {
       const radius = getRadius(newProject.priority);
       const padding = 20;
       const tryLimit = 500;
-
-      // 실제 project-map-container 크기를 기반으로 계산
-      const mapContainer = document.querySelector('.space-map-container > .project-map-container');
-      let mapWidth = window.innerWidth - 300; // 기본값 (사이드바 너비 300px)
-      let mapHeight = window.innerHeight - 400; // 기본값 (헤더, 타임라인 등 제외)
-
-      if (mapContainer) {
-        const rect = mapContainer.getBoundingClientRect();
-        mapWidth = rect.width;
-        mapHeight = rect.height;
-      }
-
+      
+      // 맵 영역만 고려 (사이드바 제외)
+      const mapWidth = window.innerWidth - 300; // 사이드바 너비 300px
+      const screenHeight = window.innerHeight;
       const centerX = mapWidth / 2;
-      const centerY = mapHeight / 2;
+      const centerY = screenHeight / 2;
 
       let x = 0;
       let y = 0;
@@ -138,7 +134,7 @@ function Home() {
       };
 
       const isWithinMapArea = (cx, cy, r) => {
-        return cx - r >= 0 && cx + r <= mapWidth && cy - r >= 0 && cy + r <= mapHeight;
+        return cx - r >= 0 && cx + r <= mapWidth && cy - r >= 0 && cy + r <= screenHeight;
       };
 
       const numExisting = Object.keys(positions).length;
@@ -149,8 +145,8 @@ function Home() {
         y = centerY;
         placed = true;
       } else {
-        //기존 프로젝트 주위에 배치 시도
-        const maxDistance = Math.max(mapWidth, mapHeight);
+        //기존 프로젝트 주위에 배치 시도 
+        const maxDistance = Math.max(mapWidth, screenHeight);
         const step = radius + padding;
         
         for (let distance = step; distance <= maxDistance && !placed && attempt < tryLimit; distance += step) {
@@ -178,14 +174,14 @@ function Home() {
           }
         }
         
-        // 그래도 실패하면 격자 방식으로 탐색
+        // 그래도 실패하면 격자 방식으로 탐색 
         if (!placed) {
           const gridSize = Math.min(radius * 2 + padding, 50);
-
+          
           for (let gx = radius; gx <= mapWidth - radius && !placed && attempt < tryLimit; gx += gridSize) {
-            for (let gy = radius; gy <= mapHeight - radius && !placed && attempt < tryLimit; gy += gridSize) {
+            for (let gy = radius; gy <= screenHeight - radius && !placed && attempt < tryLimit; gy += gridSize) {
               attempt++;
-
+              
               if (!isOverlapping(gx, gy, radius, positions)) {
                 x = gx;
                 y = gy;
@@ -195,13 +191,13 @@ function Home() {
             }
           }
         }
-
-        // 최후 수단 : 랜덤 배치
+        
+        // 최후 수단 : 랜덤 배치 
         if (!placed) {
           const maxRandomAttempts = 200;
           for (let i = 0; i < maxRandomAttempts && !placed; i++) {
             const rx = radius + Math.random() * (mapWidth - 2 * radius);
-            const ry = radius + Math.random() * (mapHeight - 2 * radius);
+            const ry = radius + Math.random() * (screenHeight - 2 * radius);
             
             if (!isOverlapping(rx, ry, radius, positions)) {
               x = rx;
@@ -229,9 +225,14 @@ function Home() {
       });
       console.log('프로젝트가 파이어베이스에 저장되었습니다.');
       
+      // 폼 닫기
+      setShowForm(false);
+      
     } catch (error) {
       console.error('프로젝트 추가 중 오류:', error);
-      alert('프로젝트 추가 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('오류 상세:', error.message, error.stack);
+      const errorMessage = error.message || '알 수 없는 오류가 발생했습니다.';
+      alert(`프로젝트 추가 중 오류가 발생했습니다.\n\n오류 내용: ${errorMessage}\n\n자세한 내용은 콘솔을 확인해주세요.`);
     }
   };
 
@@ -270,24 +271,11 @@ function Home() {
     try {
       // 데이터베이스에서 프로젝트 삭제
       await deleteProjectFromDB(id);
-
+      
       console.log('프로젝트가 성공적으로 삭제되었습니다.');
     } catch (error) {
       console.error('프로젝트 삭제 중 오류:', error);
       alert('프로젝트 삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
-  };
-
-  // 프로젝트 일부 필드 업데이트 (TodoList에서 사용)
-  const handleUpdateProject = async (projectId, updates) => {
-    if (!currentUser) return;
-
-    try {
-      await updateProject(projectId, updates);
-      console.log('프로젝트가 성공적으로 업데이트되었습니다.');
-    } catch (error) {
-      console.error('프로젝트 업데이트 중 오류:', error);
-      alert('프로젝트 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -298,14 +286,14 @@ function Home() {
     try {
       // 변경된 위치만 찾아서 업데이트
       const changedPositions = {};
-
+      
       Object.keys(newPositions).forEach(projectId => {
         const oldPos = positions[projectId];
         const newPos = newPositions[projectId];
-
-        if (!oldPos ||
-            oldPos.x !== newPos.x ||
-            oldPos.y !== newPos.y ||
+        
+        if (!oldPos || 
+            oldPos.x !== newPos.x || 
+            oldPos.y !== newPos.y || 
             oldPos.radius !== newPos.radius) {
           changedPositions[projectId] = newPos;
         }
@@ -320,7 +308,7 @@ function Home() {
         );
         console.log('프로젝트 위치가 성공적으로 업데이트되었습니다.');
       }
-
+      
       // UI 상태는 실시간 구독을 통해 자동으로 업데이트됨
     } catch (error) {
       console.error('프로젝트 위치 업데이트 중 오류:', error);
@@ -329,34 +317,10 @@ function Home() {
     }
   };
 
-  // 젤리 획득 처리 함수
-  const handleJellyReward = (rewards) => {
-    if (!rewards || rewards.length === 0) return;
-
-    // 팝업 표시
-    setJellyReward(rewards);
-
-    // 젤리 개수 업데이트
-    const newJellies = { ...jellies };
-    rewards.forEach(reward => {
-      if (reward.type === 'heart') {
-        newJellies.heart += reward.amount;
-      } else if (reward.type === 'star') {
-        newJellies.light += reward.amount; // 별 젤리는 light로 관리
-      } else if (reward.type === 'fire') {
-        newJellies.fire += reward.amount;
-      }
-    });
-    setJellies(newJellies);
-  };
-
-  // 오늘 날짜 문자열 반환 (YYYY-MM-DD) - 로컬 시간대 기준
+  // 오늘 날짜 문자열 반환 (YYYY-MM-DD)
   const getCurrentDate = () => {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return today.toISOString().split('T')[0];
   };
 
   // 로딩 중일 때
@@ -373,104 +337,64 @@ function Home() {
     return null; // 이미 navigate('/')로 리다이렉트됨
   }
 
-  // //todays todos 받기
-  // const allTodos = projects.subtasks.flatMap((subtask) =>
-  //   Object.entries(subtask.todos).flatMap(([date, todos]) =>
-  //     todos.map((todo) => ({
-  //       id: todo.id,
-  //       text: todo.text,
-  //       progress: todo.progress,
-  //       date,
-  //       completed: todo.completed,
-  //     }))
-  //   )
-  // );
-  const allTodos =
-  projects?.flatMap((project) =>
-    project?.subtasks?.flatMap((subtask) =>
-      Object.entries(subtask?.todos ?? {}).flatMap(([date, todos]) =>
-        todos.map((todo) => ({
-          id: todo.id,
-          text: todo.text,
-          progress: todo.progress,
-          date,
-          completed: todo.completed,
-          projectId: project.id,
-          subtaskId: subtask.id,
-        }))
-      )
-    ) ?? []
-  ) ?? [];
-  console.log(`projects:`, projects);
-  console.log(`allTodos:`, allTodos);
-  console.log(`today:`, getCurrentDate());
-
   return ( 
-    <div className="app-container">
-      <Sidebar/>
+    <div className="game-container">
+
+      {/* 게임 스타일 사이드바 */}
+      <div className="sidebar-container">
+        <Sidebar />
+      </div>
+
+      {/* 메인 콘텐츠 영역 */}
       <div className="main-content">
-        <Header
+        {/* 헤더 */}
+        <header className="main-header">
+          <Header 
             isLoadingName={isLoadingName}
             displayName={displayName}
             currentDate={getCurrentDate()}
             onAddClick={() => setShowForm(true)}
-            jellies={jellies}
-        />
-      {/* Date and Title */}
-      <div className="title-section">
-        <div className="date-text">2025년 09월 10일</div>
-        <h1 className="main-title">
-          남지윤님, <span className="title-highlight">오늘은 어떤 우주를 정복해볼까요?</span>
-        </h1>
-      </div>
-
-      {/* Content Grid */}
-      <div className="content-grid">
-        {/* Space Map - 2 columns */}
-        <div className="space-map-container">
-          <div className="space-map-header">
-            <h2 className="space-map-title">메인 프로젝트 우주 맵</h2>
-            <button className="space-map-add-button">프로젝트 추가</button>
+          />
+          <div className="main-header-info">
+            <h1>{displayName}님, 오늘은 어떤 우주를 정복해볼까요?</h1>
           </div>
+        </header>
 
-          {/* Background pattern */}
-          <div className="space-map-pattern"></div>
-
-          {/* Orbs Container */}
+        {/*작업영역*/}
+        <div className="workspace">
+          {/* 프로젝트 맵 */}
           <div className="project-map-container">
-             <ProjectMap
-                projects={projects}
-                positions={positions}
-                onDeleteProject={deleteProject}
-                onEditProject={editProject}
-                onPositionsChange={handlePositionChange}
+            <ProjectMap
+              projects={projects}
+              positions={positions}
+              onDeleteProject={deleteProject}
+              onEditProject={editProject}
+              onPositionsChange={handlePositionChange}
+            />
+          
+            {showForm && (
+              <ProjectForm
+                onSubmit={handleAddProject}
+                onClose={() => setShowForm(false)}
               />
+            )}
+          </div>
+          {/*우측 패널*/}
+          <div className="right-pannel">
+            <div className="todo">
+              <h3>오늘의 할 일</h3>
+              <TodoList/>
+            </div>
+            <div className="inspiration">
+              <Inspiration />
+            </div>
           </div>
         </div>
 
-        {/* Right Sidebar */}
-        <div className="right-sidebar">
-          {/* Today's Tasks */}
-            <TodaysTodo todos={allTodos} currentDate={getCurrentDate()} />
-          {/* Inspiration Card */}
-          <div className="card card-inspiration">
-            <Inspiration />
-          </div>
-        </div>
-      </div>
-        <ProjectTimeline projects= {projects}/>
-              {showForm && (
-                <ProjectForm
-                  onSubmit={handleAddProject}
-                  onClose={() => setShowForm(false)}
-                />
-              )}
-              {jellyReward && (
-                <JellyRewardPopup
-                  rewards={jellyReward}
-                  onClose={() => setJellyReward(null)}
-                />
-              )}
+        {/* 타임라인 */}
+        <footer className="timeline-footer">
+          <ProjectTimeline projects={projects} />
+        </footer>
       </div>
     </div>
   );

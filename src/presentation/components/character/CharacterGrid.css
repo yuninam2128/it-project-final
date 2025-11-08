@@ -130,6 +130,710 @@
   font-size: 12px;
   font-weight: 500;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}/* 전체 배경 */
+.backgroundColor {
+  background: #0A0F33;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  grid-template-columns: 65px 1fr;
+  flex-direction: row;
+  display: flex;
+}
+
+.side-bar {
+  background: rgba(0, 0, 0, 0.3);
+  width: 65px;
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.side-bar:hover {
+  width: 250px;
+  border-radius: 20px;
+}
+
+/* 메인 대시보드 (헤더 아래 위치) */
+.backRectangle {
+  position: absolute;
+  width: 80vw;
+  height: 70vh;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: 20px; /* 헤더 공간 확보 */
+  background: #1A1F4A;
+  border-radius: 30px;
+  border: 2px solid rgba(100, 150, 255, 0.3);
+  box-shadow: 
+    0 0 30px rgba(100, 150, 255, 0.2),
+    inset 0 0 30px rgba(100, 150, 255, 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+
+
+
+/* 캐릭터 박스 그리드 (오른쪽) */
+.character-grid {
+  position: absolute;
+  top: 50%;
+  right: 30px;
+  transform: translateY(-50%);
+  display: grid;
+  grid-template-columns: repeat(2, 190px);
+  grid-template-rows: repeat(3, 220px);
+  grid-gap: 20px;
+  padding: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 150, 255, 0.5) transparent;
+}
+
+.character-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.character-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.character-grid::-webkit-scrollbar-thumb {
+  background: rgba(100, 150, 255, 0.5);
+  border-radius: 3px;
+}
+
+/* 캐릭터 박스 */
+.character-box {
+  width: 190px;
+  height: 220px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  user-select: none;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 캐릭터 이미지 */
+.character-image {
+  width: 110px;
+  height: 110px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(100, 150, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.character-user-box {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  left: 25%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #171C40;
+  box-shadow: inset 0px 0px 6px 1px rgba(35, 101, 255, 0.15), inset 0px 0px 20px 3px rgba(255, 255, 255, 0.4), inset 0px 0px 30px 5px rgba(102, 148, 255, 0.5), inset 0px 0px 60px 23px #3C49A6;
+  border-radius: 44px;
+  z-index: 1;
+}
+
+/* 이름 */
+.character-name {
+  margin-top: auto;
+  font-size: 12px;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* 젤리 코인 가격 표시 */
+.unlock-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.cost-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(100, 150, 255, 0.3);
+}
+
+.jelly-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cost-amount {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* 구매 확인 모달 */
+.purchase-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.purchase-modal {
+  background: linear-gradient(135deg, #1A1F4A 0%, #2A2F5A 100%);
+  border-radius: 20px;
+  border: 2px solid rgba(100, 150, 255, 0.3);
+  box-shadow: 
+    0 0 30px rgba(100, 150, 255, 0.3),
+    inset 0 0 30px rgba(100, 150, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+}
+
+.purchase-modal-content h3 {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.purchase-character-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  border: 1px solid rgba(100, 150, 255, 0.2);
+}
+
+.purchase-character-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(100, 150, 255, 0.3);
+}
+
+.purchase-character-details h4 {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.purchase-price {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.purchase-cost-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 150, 255, 0.3);
+}
+
+.purchase-jelly-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.purchase-cost-amount {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.purchase-modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.purchase-yes-btn, .purchase-no-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.purchase-yes-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+}
+
+.purchase-yes-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+  transform: translateY(-2px);
+}
+
+.purchase-yes-btn:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.purchase-no-btn {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.3);
+}
+
+.purchase-no-btn:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+  transform: translateY(-2px);
+}
+
+/* 박스 상태별 색상 */
+.LockBox {
+  background: linear-gradient(135deg, rgba(20, 25, 50, 0.8) 0%, rgba(30, 35, 60, 0.6) 100%);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(100, 150, 255, 0.2);
+  box-shadow: 
+    0 0 15px rgba(100, 150, 255, 0.1),
+    inset 0 0 15px rgba(100, 150, 255, 0.05);
+}
+
+.UnlockBox {
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.15) 0%, rgba(150, 200, 255, 0.08) 100%);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(100, 150, 255, 0.5);
+  box-shadow: 
+    0 0 25px rgba(100, 150, 255, 0.3),
+    inset 0 0 25px rgba(100, 150, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.UnlockBox:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 30px rgba(100, 150, 255, 0.4),
+    inset 0 0 30px rgba(100, 150, 255, 0.2);
+}
+
+/* 잠금 해제 버튼 */
+.toggle-button {
+  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  background-color: #4caf50;
+}
+
+/* 왼쪽 이름 라벨 */
+.nameLine {
+  position: absolute;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(100, 150, 255, 0.6) 50%, transparent 100%);
+  left: 25%;
+  top: 88%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(100, 150, 255, 0.3);
+}
+
+
+/* 캐릭터 디스플레이 (메인 대시보드 내부) */
+.character-display {
+  position: absolute;
+  left: 25%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  z-index: 2;
+}
+
+.character-display .character-visual {
+  width: 250px;
+  height: 250px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+
+
+
+
+/* 이름 위에 캐릭터 이미지 표시 */
+.character-display-inside {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.character-visual-inside {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+/* 스토어 헤더 (홈화면과 동일한 스타일) */
+.store-header {
+  position: fixed;
+  top: 0;
+  left: 65px;
+  right: 0;
+  padding: 20px 30px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.header__button {
+  background: #43476B; 
+  border: none;
+  border-radius: 44px;
+  padding: 10px 15px;
+  color: #ffffff;
+  display: inline-flex; 
+  align-items: center;
+  gap: 20px;
+  min-height: 40px;
+  margin-left: 5px;
+}
+
+.header__button--right {
+  min-width: 100px;
+}
+
+.header__button img {
+  width: 20px;
+  height: 20px;
+}
+
+.left-header .header__button:active {
+  background: #ffffff;
+  color: #0A0F33;
+}
+
+
+
+/* 닉네임 섹션 */
+.name-section {
+  position: absolute;
+  left: 26%;
+  top: 80%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  z-index: 3;
+}
+
+/* 닉네임 표시 */
+.nickname-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  color: #FFFFFF;
+  white-space: nowrap;
+  margin: 0;
+  text-shadow: 0 0 15px rgba(100, 150, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+/* 닉네임 수정 버튼 */
+.edit-nickname-btn {
+  padding: 8px;
+  border: 1px solid rgba(100, 150, 255, 0.5);
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.1) 0%, rgba(150, 200, 255, 0.05) 100%);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 10px rgba(100, 150, 255, 0.2);
+}
+
+.edit-nickname-btn:hover {
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.3) 0%, rgba(150, 200, 255, 0.2) 100%);
+  border-color: rgba(100, 150, 255, 0.8);
+  color: #FFFFFF;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(100, 150, 255, 0.4);
+}
+
+/* 닉네임 편집 모드 */
+.nickname-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.nickname-input {
+  padding: 8px 12px;
+  border: 1px solid rgba(100, 150, 255, 0.5);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.1) 0%, rgba(150, 200, 255, 0.05) 100%);
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: left;
+  outline: none;
+  min-width: 180px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 10px rgba(100, 150, 255, 0.2);
+}
+
+.nickname-input:focus {
+  border-color: rgba(100, 150, 255, 0.8);
+  box-shadow: 0 0 20px rgba(100, 150, 255, 0.4);
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.2) 0%, rgba(150, 200, 255, 0.1) 100%);
+}
+
+.nickname-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.nickname-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.save-btn, .cancel-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(100, 150, 255, 0.4);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.save-btn {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.8) 0%, rgba(56, 142, 60, 0.6) 100%);
+  color: white;
+  border-color: rgba(76, 175, 80, 0.6);
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 1) 0%, rgba(56, 142, 60, 0.8) 100%);
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+  transform: translateY(-1px);
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.8) 0%, rgba(211, 47, 47, 0.6) 100%);
+  color: white;
+  border-color: rgba(244, 67, 54, 0.6);
+}
+
+.cancel-btn:hover {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 1) 0%, rgba(211, 47, 47, 0.8) 100%);
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 해금 애니메이션 */
+.unlocking {
+  animation: unlockAnimation 2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.8) !important;
+}
+
+@keyframes unlockAnimation {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.8);
+    border-color: rgba(255, 215, 0, 0.8);
+  }
+  25% {
+    transform: scale(1.15);
+    box-shadow: 0 0 30px 20px rgba(255, 215, 0, 0.6);
+    border-color: rgba(255, 215, 0, 1);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px 25px rgba(255, 215, 0, 0.4);
+    border-color: rgba(255, 215, 0, 0.8);
+  }
+  75% {
+    transform: scale(1.12);
+    box-shadow: 0 0 35px 22px rgba(255, 215, 0, 0.3);
+    border-color: rgba(255, 215, 0, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    border-color: rgba(100, 150, 255, 0.3);
+  }
+}
+
+/* 해금 효과 (반짝이는 별들) */
+.unlock-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sparkle {
+  position: absolute;
+  font-size: 20px;
+  animation: sparkleAnimation 2s ease-in-out infinite;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.sparkle:nth-child(1) {
+  top: 15%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.sparkle:nth-child(2) {
+  top: 25%;
+  right: 15%;
+  animation-delay: 0.3s;
+}
+
+.sparkle:nth-child(3) {
+  bottom: 25%;
+  left: 50%;
+  animation-delay: 0.6s;
+}
+
+@keyframes sparkleAnimation {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(1.3) rotate(90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(180deg);
+  }
+  75% {
+    opacity: 0.8;
+    transform: scale(1.2) rotate(270deg);
+  }
+}
+
+/* 선택된 캐릭터 스타일 */
+.character-box.selected {
+  border: 2px solid rgba(100, 150, 255, 0.8);
+  box-shadow: 
+    0 0 25px rgba(100, 150, 255, 0.6),
+    inset 0 0 25px rgba(100, 150, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.character-box.selected.UnlockBox {
+  background: linear-gradient(135deg, rgba(100, 150, 255, 0.2) 0%, rgba(150, 200, 255, 0.1) 100%);
+}
+
+/* 캐릭터 박스 호버 효과 */
+.character-box.UnlockBox:hover {
+  transform: scale(1.03);
+  border-color: rgba(100, 150, 255, 0.6);
+  box-shadow: 
+    0 0 25px rgba(100, 150, 255, 0.4),
+    inset 0 0 25px rgba(100, 150, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.character-box.UnlockBox:active {
+  transform: scale(0.98);
+}
+
+.character-box.LockBox:hover {
+  transform: scale(1.02);
+  border-color: rgba(100, 150, 255, 0.4);
+  box-shadow: 
+    0 0 20px rgba(100, 150, 255, 0.2),
+    inset 0 0 20px rgba(100, 150, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
 /* 박스 상태별 색상 */

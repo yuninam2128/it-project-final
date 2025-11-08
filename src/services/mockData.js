@@ -1,5 +1,5 @@
 // Mock 데이터 - Firebase 연결 없이 프론트엔드 개발용
-
+/*
 // 샘플 사용자 데이터
 export const mockUser = {
   uid: 'mock-user-123',
@@ -269,3 +269,4 @@ export const resetMockData = () => {
   localStorage.removeItem(USER_STORAGE_KEY);
   return mockProjects;
 };
+*/
