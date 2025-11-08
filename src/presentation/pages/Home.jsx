@@ -11,14 +11,14 @@ import ProjectForm from "../components/project/ProjectForm";
 import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import "./Home.css";
 import TodaysTodo from "../components/todo/TodaysTodo";
-import { subscribeAuth, getCurrentUserDisplayName } from '../../services/mockAuth';
+import { subscribeAuth, getCurrentUserDisplayName } from '../../services/auth';
 import {
   createProject,
   updateProject,
   deleteProject as deleteProjectFromDB,
   updateProjectPosition,
   subscribeToUserProjects
-} from '../../services/mockProjects';
+} from '../../services/projects';
 
 // Mock 데이터 사용 (Firebase 연결 제거)
 // Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변경
@@ -418,10 +418,6 @@ function Home() {
         />
       {/* Date and Title */}
       <div className="title-section">
-        <div className="date-text">2025년 09월 10일</div>
-        <h1 className="main-title">
-          남지윤님, <span className="title-highlight">오늘은 어떤 우주를 정복해볼까요?</span>
-        </h1>
       </div>
 
       {/* Content Grid */}
