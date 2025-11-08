@@ -426,7 +426,7 @@ function Home() {
         <div className="space-map-container">
           <div className="space-map-header">
             <h2 className="space-map-title">메인 프로젝트 우주 맵</h2>
-            <button className="space-map-add-button">프로젝트 추가</button>
+            {/*<button className="space-map-add-button">프로젝트 추가</button>*/}
           </div>
 
           {/* Background pattern */}
