@@ -8,12 +8,23 @@
   color: white;
   min-height: 100vh;
 }
-
+.card {
+  background: linear-gradient(135deg, rgb(30, 41, 59) 0%, rgb(15, 23, 42) 100%);
+  border-radius: 1.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
 /* 레이아웃 */
 .container-detail {
   display: grid;
   grid-template-columns: 65px 1fr;   /* 좌측 15%, 나머지 */
   height: 100vh;
+}
+
+/* Todo Expanded */
+.card-todo-expanded {
+  height: 100%;
 }
 
 /* 좌측 사이드바 */

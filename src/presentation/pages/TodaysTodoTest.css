@@ -1,0 +1,365 @@
+/* TodaysTodoTest.css - 테스트 페이지 스타일 */
+
+.todays-todo-test-container {
+  min-height: 100vh;
+  background: #0A0F33;
+  color: white;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* 헤더 */
+.test-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.test-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.test-header p {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 컨트롤 섹션 */
+.test-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.control-group label {
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.control-group input[type="date"] {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-group input[type="date"]:hover,
+.control-group input[type="date"]:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(96, 165, 250, 0.5);
+  outline: none;
+}
+
+.control-group input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.control-group select {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-group select:hover,
+.control-group select:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(96, 165, 250, 0.5);
+  outline: none;
+}
+
+.control-group select option {
+  background: #0A0F33;
+  color: white;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* 버튼 스타일 */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(96, 165, 250, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 메인 콘텐츠 */
+.test-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.component-wrapper {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 디버그 패널 */
+.debug-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-panel h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.debug-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.debug-info p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.5rem;
+  border-left: 3px solid rgba(96, 165, 250, 0.5);
+}
+
+.debug-info strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.json-display {
+  margin: 0;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  color: rgba(147, 197, 253, 0.9);
+  font-size: 0.75rem;
+  overflow-x: auto;
+  flex: 1;
+  line-height: 1.5;
+  font-family: 'Courier New', monospace;
+}
+
+/* 테스트 노트 */
+.test-notes {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+}
+
+.test-notes h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(34, 197, 94, 0.9);
+}
+
+.test-notes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.test-notes li {
+  padding: 0.75rem 1rem 0.75rem 2rem;
+  position: relative;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.test-notes li::before {
+  content: "✓";
+  position: absolute;
+  left: 0.75rem;
+  color: rgba(34, 197, 94, 0.9);
+  font-weight: 600;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1400px) {
+  .test-content {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .debug-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1024px) {
+  .test-content {
+    grid-template-columns: 1fr;
+  }
+
+  .debug-panel {
+    grid-column: auto;
+  }
+
+  .control-buttons {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .todays-todo-test-container {
+    padding: 1.25rem;
+  }
+
+  .test-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .control-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .control-group input[type="date"] {
+    width: 100%;
+  }
+
+  .component-wrapper {
+    min-height: 300px;
+  }
+
+  .debug-panel {
+    min-height: 300px;
+  }
+
+  .json-display {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .todays-todo-test-container {
+    padding: 1rem;
+  }
+
+  .test-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .test-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .test-controls {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .control-buttons {
+    gap: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+}

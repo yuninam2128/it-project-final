@@ -124,16 +124,6 @@ function SubtaskForm({ onSubmit, onClose }) {
             </label>
           </div>
 
-          <label>
-            설명:
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="세부 작업에 대한 설명을 입력하세요 (선택사항)"
-              rows="3"
-            />
-          </label>
-
           <div className="form-buttons">
             <button type="submit" className="submit-btn">추가</button>
             <button type="button" className="cancel-btn" onClick={onClose}>취소</button>

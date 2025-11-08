@@ -12,6 +12,24 @@ function ProjectMap({ projects, positions, onDeleteProject, onEditProject, onPos
   const draftPositionsRef = useRef(null);
   const [overlayPositions, setOverlayPositions] = useState({});
   const dragStartedRef = useRef(false);
+  const mapContainerRef = useRef(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  // 컨테이너 크기 감지 및 업데이트
+  useEffect(() => {
+    const updateContainerSize = () => {
+      if (mapContainerRef.current) {
+        setContainerSize({
+          width: mapContainerRef.current.clientWidth,
+          height: mapContainerRef.current.clientHeight,
+        });
+      }
+    };
+
+    updateContainerSize();
+    window.addEventListener("resize", updateContainerSize);
+    return () => window.removeEventListener("resize", updateContainerSize);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
@@ -23,14 +41,31 @@ function ProjectMap({ projects, positions, onDeleteProject, onEditProject, onPos
     };
   });
 
+  // Circle이 컨테이너 경계 내에 있도록 제한
+  const clampPositionToBounds = (x, y, radius) => {
+    const minX = radius;
+    const maxX = containerSize.width - radius;
+    const minY = radius;
+    const maxY = containerSize.height - radius;
+
+    return {
+      x: Math.max(minX, Math.min(x, maxX)),
+      y: Math.max(minY, Math.min(y, maxY)),
+    };
+  };
+
   const getPosition = (id) => {
     const pos = overlayPositions[id] || (draftPositionsRef.current && draftPositionsRef.current[id]) || positions[id];
-    return pos
-      ? {
-          top: pos.y - pos.radius + mapOffset.y,
-          left: pos.x - pos.radius + mapOffset.x,
-        }
-      : { top: 0, left: 0 };
+
+    if (!pos) return { top: 0, left: 0 };
+
+    // 원의 중심이 컨테이너 내부에 있도록 제한
+    const clampedPos = clampPositionToBounds(pos.x, pos.y, pos.radius);
+
+    return {
+      top: clampedPos.y - pos.radius + mapOffset.y,
+      left: clampedPos.x - pos.radius + mapOffset.x,
+    };
   };
 
   const handleMouseDown = (e) => {
@@ -62,9 +97,15 @@ function ProjectMap({ projects, positions, onDeleteProject, onEditProject, onPos
       if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
         dragStartedRef.current = true;
       }
+
+      // 새로운 위치 계산 및 경계 제한 적용
+      const newX = current.x + dx;
+      const newY = current.y + dy;
+      const clampedPos = clampPositionToBounds(newX, newY, current.radius);
+
       draftPositionsRef.current = {
         ...draftPositionsRef.current,
-        [id]: { x: current.x + dx, y: current.y + dy, radius: current.radius }
+        [id]: { x: clampedPos.x, y: clampedPos.y, radius: current.radius }
       };
     } else if (isPanning) {
       setMapOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
@@ -111,7 +152,8 @@ function ProjectMap({ projects, positions, onDeleteProject, onEditProject, onPos
   }, [positions, overlayPositions]);
 
   return (
-    <div 
+    <div
+      ref={mapContainerRef}
       className="project-map"
       onMouseDown={handleMouseDown}
       style={{
