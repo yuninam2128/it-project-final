@@ -12,12 +12,14 @@ import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import "./Home.css";
 import TodaysTodo from "../components/todo/TodaysTodo";
 import { subscribeAuth, getCurrentUserDisplayName } from '../../services/auth';
+import { getUserCoins, setUserCoins } from '../../services/coins';
 import {
   createProject,
   updateProject,
   deleteProject as deleteProjectFromDB,
   updateProjectPosition,
-  subscribeToUserProjects
+  subscribeToUserProjects,
+  subscribeToSubtaskTodos
 } from '../../services/projects';
 
 // Mock 데이터 사용 (Firebase 연결 제거)
@@ -34,6 +36,7 @@ function Home() {
   const [isLoadingName, setIsLoadingName] = useState(true);
   const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수
   const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
+  const [allTodos, setAllTodos] = useState([]); // 모든 투두 리스트
   // const today = getCurrentDate(); // 오늘 날짜 변수
 
   //로그인 상태 구독
@@ -67,6 +70,16 @@ function Home() {
     return () => unsubscribe();
   }, [navigate]);
 
+  // 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수
+  const formatDateToString = (date) => {
+    if (!date) return null;
+    const d = date instanceof Date ? date : (date.toDate ? date.toDate() : new Date(date));
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // 사용자의 프로젝트 실시간 구독
   useEffect(() => {
     if (!currentUser) return;
@@ -87,6 +100,62 @@ function Home() {
       unsubscribe();
     };
   }, [currentUser]);
+
+  // 모든 subtask의 todos를 실시간으로 구독
+  useEffect(() => {
+    if (!currentUser || !projects || projects.length === 0) {
+      setAllTodos([]);
+      return;
+    }
+
+    // 모든 subtask에 대해 todos 구독
+    const unsubscribes = [];
+    const todosMap = new Map(); // projectId-subtaskId를 키로 사용
+
+    projects.forEach(project => {
+      if (!project.subtasks || !Array.isArray(project.subtasks)) return;
+
+      project.subtasks.forEach(subtask => {
+        if (!subtask.id) return;
+
+        const key = `${project.id}-${subtask.id}`;
+        const subtaskDeadline = subtask.deadline ? formatDateToString(subtask.deadline) : null;
+        
+        const unsubscribe = subscribeToSubtaskTodos(project.id, subtask.id, (todosData) => {
+          // todosData는 { "YYYY-MM-DD": [todos] } 형태
+          const todosList = [];
+          Object.entries(todosData || {}).forEach(([dateKey, todosArray]) => {
+            if (Array.isArray(todosArray)) {
+              todosArray.forEach(todo => {
+                todosList.push({
+                  ...todo,
+                  id: todo.id || Date.now().toString(),
+                  date: dateKey, // 생성일
+                  deadline: subtaskDeadline, // 마감일
+                  projectId: project.id,
+                  subtaskId: subtask.id,
+                  subtaskTitle: subtask.title,
+                });
+              });
+            }
+          });
+
+          // 해당 subtask의 todos 업데이트
+          todosMap.set(key, todosList);
+
+          // 모든 todos를 배열로 변환
+          const allTodosArray = Array.from(todosMap.values()).flat();
+          setAllTodos(allTodosArray);
+        });
+
+        unsubscribes.push(unsubscribe);
+      });
+    });
+
+    return () => {
+      unsubscribes.forEach(unsub => unsub());
+    };
+  }, [currentUser, projects]);
 
   // 중요도에 따른 원 크기 반환 
   const getRadius = (priority) => {
@@ -329,25 +398,87 @@ function Home() {
     }
   };
 
+  // 젤리 보상 타입을 Firebase 필드명으로 매핑
+  const mapRewardTypeToFirebaseField = (type) => {
+    const typeMap = {
+      'heart': 'heartJelly',
+      'fire': 'fireJelly',
+      'star': 'lightJelly'  // star 타입을 lightJelly로 변환
+    };
+    return typeMap[type] || null;
+  };
+
+  // 젤리 보상 타입을 상태 속성으로 매핑
+  const mapRewardTypeToStateProperty = (type) => {
+    const typeMap = {
+      'heart': 'heart',
+      'fire': 'fire',
+      'star': 'light'  // star 타입을 light 속성으로 변환
+    };
+    return typeMap[type] || type;
+  };
+
   // 젤리 획득 처리 함수
-  const handleJellyReward = (rewards) => {
-    if (!rewards || rewards.length === 0) return;
+  const handleJellyReward = async (rewards, todoId) => {
+    console.log('[Home.jsx] handleJellyReward 호출:', {
+      todoId,
+      rewards,
+      rewardsLength: rewards?.length,
+      isEmpty: !rewards || rewards.length === 0,
+      currentUser: currentUser?.uid
+    });
+    
+    if (!rewards || rewards.length === 0) {
+      console.log('[Home.jsx] rewards가 비어있음 - return');
+      return;
+    }
+
+    if (!currentUser) {
+      console.warn('[Home.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
+      // 로그인하지 않아도 팝업은 표시
+      setJellyReward(rewards);
+      return;
+    }
+
+    try {
+      // 현재 사용자의 젤리 보유 수 가져오기
+      const currentCoins = await getUserCoins(currentUser.uid);
+      console.log('[Home.jsx] 현재 젤리 보유 수:', currentCoins);
+
+      // 보상만큼 더하기
+      const updatedCoins = { ...currentCoins };
+      rewards.forEach(reward => {
+        const fieldName = mapRewardTypeToFirebaseField(reward.type);
+        if (fieldName) {
+          // 명시적으로 Number로 변환하여 계산
+          const currentAmount = Number(updatedCoins[fieldName] || 0);
+          const rewardAmount = Number(reward.amount);
+          updatedCoins[fieldName] = currentAmount + rewardAmount;
+          console.log(`[Home.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+        }
+      });
+
+      // Firebase에 저장
+      await setUserCoins(currentUser.uid, updatedCoins);
+      console.log('[Home.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+
+      // 로컬 state도 업데이트 (UI 반응성 향상)
+      setJellies(prev => {
+        const updated = { ...prev };
+        rewards.forEach(reward => {
+          const stateProperty = mapRewardTypeToStateProperty(reward.type);
+          updated[stateProperty] = (updated[stateProperty] || 0) + Number(reward.amount);
+        });
+        return updated;
+      });
+    } catch (error) {
+      console.error('[Home.jsx] 젤리 저장 중 오류:', error);
+      // 오류가 발생해도 팝업은 표시
+    }
 
     // 팝업 표시
+    console.log('[Home.jsx] setJellyReward 실행:', rewards);
     setJellyReward(rewards);
-
-    // 젤리 개수 업데이트
-    const newJellies = { ...jellies };
-    rewards.forEach(reward => {
-      if (reward.type === 'heart') {
-        newJellies.heart += reward.amount;
-      } else if (reward.type === 'star') {
-        newJellies.light += reward.amount; // 별 젤리는 light로 관리
-      } else if (reward.type === 'fire') {
-        newJellies.fire += reward.amount;
-      }
-    });
-    setJellies(newJellies);
   };
 
   // 오늘 날짜 문자열 반환 (YYYY-MM-DD) - 로컬 시간대 기준
@@ -373,34 +504,6 @@ function Home() {
     return null; // 이미 navigate('/')로 리다이렉트됨
   }
 
-  // //todays todos 받기
-  // const allTodos = projects.subtasks.flatMap((subtask) =>
-  //   Object.entries(subtask.todos).flatMap(([date, todos]) =>
-  //     todos.map((todo) => ({
-  //       id: todo.id,
-  //       text: todo.text,
-  //       progress: todo.progress,
-  //       date,
-  //       completed: todo.completed,
-  //     }))
-  //   )
-  // );
-  const allTodos =
-  projects?.flatMap((project) =>
-    project?.subtasks?.flatMap((subtask) =>
-      Object.entries(subtask?.todos ?? {}).flatMap(([date, todos]) =>
-        todos.map((todo) => ({
-          id: todo.id,
-          text: todo.text,
-          progress: todo.progress,
-          date,
-          completed: todo.completed,
-          projectId: project.id,
-          subtaskId: subtask.id,
-        }))
-      )
-    ) ?? []
-  ) ?? [];
   console.log(`projects:`, projects);
   console.log(`allTodos:`, allTodos);
   console.log(`today:`, getCurrentDate());
@@ -447,7 +550,12 @@ function Home() {
         {/* Right Sidebar */}
         <div className="right-sidebar">
           {/* Today's Tasks */}
-            <TodaysTodo todos={allTodos} currentDate={getCurrentDate()} />
+            <TodaysTodo 
+              todos={allTodos} 
+              currentDate={getCurrentDate()}
+              projects={projects}
+              onJellyReward={handleJellyReward}
+            />
           {/* Inspiration Card */}
           <div className="card card-inspiration">
             <Inspiration />
