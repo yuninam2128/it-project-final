@@ -107,20 +107,19 @@ function CharacterGrid({ characters, onSelect }) {
     return () => unsubscribe();
   }, [user]);
 
-  // 사용자 데이터 변경 시 파이어베이스에 저장
+  // 사용자 데이터 변경 시 파이어베이스에 저장 (닉네임 제외 - saveNickname에서 처리)
   useEffect(() => {
     if (user && !isLoading) {
       const characterData = {
         selectedCharacter,
         unlockedCharacters,
-        // userMoney 제거됨
-        nickname
+        nickname // 닉네임도 포함하되, saveNickname에서 저장한 후에는 중복 저장 방지
       };
       saveUserCharacterData(user.uid, characterData).catch(error => {
         console.error('Error saving character data:', error);
       });
     }
-  }, [user, selectedCharacter, unlockedCharacters, nickname, isLoading]);
+  }, [user, selectedCharacter, unlockedCharacters, isLoading]); // nickname 제외하여 무한 루프 방지
 
   // 자동 해금 체크 및 업데이트 (임시 코인 로직 제거됨)
   useEffect(() => {
@@ -256,26 +255,39 @@ function CharacterGrid({ characters, onSelect }) {
 
   // 닉네임 저장
   const saveNickname = async () => {
-    if (tempNickname.trim()) {
-      const newNickname = tempNickname.trim();
-      setNickname(newNickname);
-      // 로컬 스토리지에도 백업 저장
-      localStorage.setItem('userNickname', newNickname);
-      setIsEditingNickname(false);
-      setTempNickname('');
+    if (!tempNickname.trim() || !user) return;
+    
+    const newNickname = tempNickname.trim();
+    
+    // 로컬 state 즉시 업데이트 (사용자 경험 개선)
+    setNickname(newNickname);
+    // 로컬 스토리지에도 백업 저장
+    localStorage.setItem('userNickname', newNickname);
+    setIsEditingNickname(false);
+    setTempNickname('');
 
-      // 파이어베이스에 닉네임 저장
-      if (user) {
-        try {
-          const characterData = {
-            selectedCharacter,
-            unlockedCharacters,
-            nickname: newNickname
-          };
-          await saveUserCharacterData(user.uid, characterData);
-        } catch (error) {
-          console.error('Error saving nickname:', error);
-        }
+    // 파이어베이스에 닉네임 저장
+    try {
+      const characterData = {
+        selectedCharacter,
+        unlockedCharacters,
+        nickname: newNickname
+      };
+      await saveUserCharacterData(user.uid, characterData);
+      console.log('닉네임 저장 완료:', newNickname);
+      
+      // 저장 후 Firebase에서 다시 불러와서 확인
+      const updatedData = await getUserCharacterData(user.uid);
+      if (updatedData && updatedData.nickname) {
+        setNickname(updatedData.nickname);
+        console.log('Firebase에서 확인된 닉네임:', updatedData.nickname);
+      }
+    } catch (error) {
+      console.error('Error saving nickname:', error);
+      // 에러 발생 시 이전 닉네임으로 복구
+      const characterData = await getUserCharacterData(user.uid);
+      if (characterData && characterData.nickname) {
+        setNickname(characterData.nickname);
       }
     }
   };

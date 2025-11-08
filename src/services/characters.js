@@ -11,15 +11,38 @@ import {
 export const saveUserCharacterData = async (userId, characterData) => {
   try {
     const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
-      characterData: {
-        selectedCharacter: characterData.selectedCharacter,
-        unlockedCharacters: characterData.unlockedCharacters,
-        userMoney: characterData.userMoney,
-        nickname: characterData.nickname,
-        updatedAt: serverTimestamp()
-      }
-    });
+    
+    // 문서 존재 여부 확인
+    const userSnap = await getDoc(userRef);
+    const existingData = userSnap.exists() ? userSnap.data() : {};
+    const existingCharacterData = existingData.characterData || {};
+    
+    // 기존 데이터와 병합
+    const updatedCharacterData = {
+      ...existingCharacterData,
+      selectedCharacter: characterData.selectedCharacter !== undefined ? characterData.selectedCharacter : existingCharacterData.selectedCharacter,
+      unlockedCharacters: characterData.unlockedCharacters !== undefined ? characterData.unlockedCharacters : existingCharacterData.unlockedCharacters,
+      nickname: characterData.nickname !== undefined ? characterData.nickname : existingCharacterData.nickname,
+      updatedAt: serverTimestamp()
+    };
+    
+    // userMoney가 제공된 경우에만 업데이트
+    if (characterData.userMoney !== undefined) {
+      updatedCharacterData.userMoney = characterData.userMoney;
+    }
+    
+    // 문서가 없으면 생성, 있으면 업데이트
+    if (userSnap.exists()) {
+      await updateDoc(userRef, {
+        characterData: updatedCharacterData
+      });
+    } else {
+      await setDoc(userRef, {
+        characterData: updatedCharacterData
+      }, { merge: true });
+    }
+    
+    console.log('캐릭터 데이터 저장 완료:', updatedCharacterData);
   } catch (error) {
     console.error('Error saving character data:', error);
     throw error;
