@@ -4,10 +4,12 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: 
+  background:
     radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+  /* Circle이 컨테이너를 벗어나지 않도록 설정 */
+  contain: layout style paint;
 }
 
 .project-map::before {
@@ -17,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
     radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
     radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent),
@@ -27,6 +29,7 @@
   background-size: 200px 200px;
   animation: sparkle 20s linear infinite;
   pointer-events: none;
+  z-index: 1;
 }
 
 @keyframes sparkle {
@@ -38,4 +41,15 @@
 .project-container {
   position: absolute;
   z-index: 10;
+  /* Circle이 컨테이너 내부에만 배치되도록 */
+  pointer-events: auto;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .project-map {
+    /* 모바일에서도 동일하게 동작 */
+    width: 100%;
+    height: 100%;
+  }
 }

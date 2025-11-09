@@ -1,56 +1,50 @@
 .project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.project-list-title {
+  font-size: 0.875rem;
+  color: rgb(148, 163, 184);
+  font-weight: 500;
+}
+
+.project-list-items {
   list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
+  padding-left: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.project-item {
-  padding: 10px 8px;
-  margin-bottom: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+.project-category {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgb(203, 213, 225);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.project-category:hover {
   color: white;
-  font-size: 14px;
-  
-  /* 가로 오버플로우 방지 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
-.project-item:hover {
-  background: rgba(255, 255, 255, 0.2);
+.project-subitems {
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: rgb(148, 163, 184);
+  list-style: none;
 }
 
-.no-projects-message {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  text-align: center;
-  margin: 20px 0;
-  
-  /* 가로 오버플로우 방지 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+.project-subitem {
+  cursor: pointer;
 }
 
-/* 사이드바가 접힌 상태에서 텍스트 숨김 */
-.sidebar:not(:hover) .project-item,
-.sidebar:not(:hover) .no-projects-message {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* 사이드바가 펼쳐진 상태에서 텍스트 표시 */
-.sidebar:hover .project-item,
-.sidebar:hover .no-projects-message {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.3s ease;
+.project-subitem:hover {
+  color: white;
 }

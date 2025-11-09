@@ -1,3 +1,6 @@
+/* 폰트 import 추가 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600&family=Open+Sans:wght@300&display=swap');
+
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -10,7 +13,7 @@ html, body, #root {
   width: 100%;
   min-height: 200vh;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #0e1546 10%, #1E2D99 30%);
+  background: linear-gradient(180deg, #222222 50%, #202a6a);
 }
 
 /* 헤더 */
@@ -20,7 +23,7 @@ html, body, #root {
   align-items: center;
   width: 100%;
   height: 60px;
-  background: #000000;
+  background: #111111;
   position: fixed;
   top: 0;
   left: 0;
@@ -30,50 +33,18 @@ html, body, #root {
   gap: 2rem;
 }
 
-/* 로고 컨테이너 */
-.logo-container {
-  position: absolute;
-  left: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 11;
-}
-
-.logo {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
-}
-
-.logo-text {
-  height: 30px;
-  width: auto;
-  object-fit: contain;
-  margin-left: 10px;
-}
-
 /* 가격/로그인 섹션 */
 .price {
   display: flex;
   align-items: center;
   gap: 2rem;
-}
-
-
-.pricetext {
-  font-family: 'Open Sans', sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 22px;
-  color: #ffffff;
-  text-decoration: none;
+  border: none;
 }
 
 .logintext {
   font-family: 'Open Sans', sans-serif;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 300;
   font-size: 16px;
   line-height: 22px;
   color: #fffcfc;
@@ -98,10 +69,10 @@ html, body, #root {
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 300;
   font-size: 16px;
   line-height: 19px;
-  color: #FFFFFF;
+  color: rgb(233, 233, 233);
   text-decoration: none;
   transition: background-color 0.3s ease;
 }
@@ -111,26 +82,56 @@ html, body, #root {
 }
 
 /* 메인 섹션 */
-main {
+.main {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   padding: 0 2rem;
-  margin-top: 120px; /* 헤더 높이 + 여백 */
+  margin-top: 200px; /* 헤더 높이 + 여백 */
   min-height: 60vh;
   justify-content: center;
-  margin-left: 5rem;
+  z-index: 1;
 }
 
-/* 메인 제목 */
-.bigtext {
-  font-family: 'Poppins', sans-serif;
+.landing-title{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgb(233, 233, 233);
+  font-weight: 100;
+  flex-direction: column;
+  gap: 2rem;
+  z-index: 3;
+  border: none;
+}
+
+.title-message{
+  font-family: 'Inter', sans-serif;
   font-style: normal;
-  font-weight: 600;
-  font-size: clamp(2rem, 5vw, 3.5rem); /* 반응형 폰트 크기 */
-  line-height: 140%;
-  color: #FFFFFF;
-  max-width: 600px;
+  font-weight: 300;
+  font-size: 35px;
+}
+
+/* 텍스트 로고 이미지 크기 지정 */
+.text-logo {
+  max-width: 1000px;
+  height: auto;
+}
+
+/* landing-circle 반응형으로 수정 */
+.landing-circle{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  width: 2000px;
+  height: 2000px;
+  max-width: 90vw;
+  max-height: 90vw;
+  top: 250px;
+  z-index: 2;
 }
 
 /* 회원가입 버튼 (메인) */
@@ -139,22 +140,191 @@ main {
   justify-content: center;
   align-items: center;
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.27);
+  background: rgb(255, 255, 255);
   border: none;
   border-radius: 30px;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  font-weight: 600;
+  font-weight: 300;
   font-size: 18px;
-  color: #FFFFFF;
+  color: #000000a0;
   transition: background-color 0.3s ease;
-  text-decoration: none !important;
+  margin-top: 7.5rem;
+  z-index: 3;
+  text-decoration: none;
+}
+
+/* explain 섹션 padding-top 수정 */
+.explain{
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 5rem;
+  gap: 10rem;
+  padding-top: 15rem; /* 65rem에서 15rem으로 수정 */
+  width: 100%;
+  z-index: 2;
+  font-family: 'Open Sans', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.first-ex{
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  z-index: 3;
+  align-self: flex-start;
+  justify-content: center;
+}
+
+.first-ex-text{
+  display: flex;
+  flex-direction: column;
+}
+
+.second-ex{
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  z-index: 3;
+  align-self: center;
+  justify-content: center;
+}
+
+.second-ex-text{
+  display: flex;
+  flex-direction: column;
+}
+
+.third-ex{
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  z-index: 3;
+  align-self: flex-end;
+  justify-content: center;
+}
+
+.third-ex-text{
+  display: flex;
+  flex-direction: column;
+}
+
+/* shine 이미지 크기 지정 */
+.shine {
+  width: 50px;
+  height: auto;
+  margin-right: 1rem;
+}
+
+.plan-title{
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 45px;
+  color: white;
+  z-index: 3;
+  margin-bottom: 4rem;
+  margin-top: 5rem;
+}
+
+/* plan 섹션에 flex-wrap 추가 */
+.plan{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* 화면 작을 때 세로 정렬 */
+  z-index: 3;
+  align-self: center;
+  justify-content: center;
+  gap: 6rem;
+  margin-bottom: 12rem;
+}
+
+.plan-free{
+  border: 1px solid;
+  border-color: #989898;
+  border-radius: 50px;
+  height: 580px;
+  width: 535px;
+  max-width: calc(100vw - 4rem); /* 화면보다 작게 */
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.plan-pro{
+  border: 1px solid;
+  border-color: #989898;
+  border-radius: 50px;
+  height: 580px;
+  width: 535px;
+  max-width: calc(100vw - 4rem); /* 화면보다 작게 */
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 2rem;
+  background-color: #98989880;
+  box-sizing: border-box;
+}
+
+.free-title{
+  color: #6673ff;
+  font-size: 48px;
+  font-weight: 600;
+  left: 55px;
+  line-height: 57.4px;
+  top: 2rem;
+  left: 2rem;
+  white-space: nowrap;
+}
+
+.plan-price{
   margin-top: 2rem;
-  margin-left: 0.5rem;
+  color: #ffffff;
+}
+
+.plan-button{
+  margin-top: 4rem;
+  display: flex;
+  align-self: center;
+  background-color: #ffffff;
+  border: none;
+  padding: 1rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
+  border-radius: 50px;
+  font-size: 30px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.plan-explain{
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* check 이미지 크기 지정 */
+.check{
+  margin-right: 1rem;
+  width: 24px;
+  height: 24px;
+}
+
+.explain-text{
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 300;
 }
 
 /* 링크로 감싸진 회원가입 버튼의 밑줄 제거 */
-a {
+.a {
   text-decoration: none !important;
 }
 
@@ -169,53 +339,21 @@ a:active {
   background: rgba(255, 255, 255, 0.4);
 }
 
-/* 기능 섹션 */
-.feature-section {
-  padding: 4rem 2rem;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 25rem;
-}
-
-.text1 {
-  font-family: 'Poppins', sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: clamp(1.5rem, 4vw, 2.5rem); /* 반응형 폰트 크기 */
-  line-height: 140%;
-  text-align: center;
-  color: #FFFFFF;
-  margin-bottom: 3rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 기능 리스트 */
-.feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 600px;
-  margin: 0 auto;
-  list-style: none;
-  padding: 0;
-}
-
-.feature-list li {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem 2rem;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.feature-list li:hover {
-  background: rgba(255, 255, 255, 0.2);
+/* 노트북/데스크톱 반응형 (1024px ~ 1440px) */
+@media (max-width: 1440px) {
+  .landing-circle {
+    width: 1200px;
+    height: 1200px;
+  }
+  
+  .explain {
+    padding-top: 50rem;
+  }
+  
+  .plan-free, .plan-pro {
+    width: 450px;
+    height: 540px;
+  }
 }
 
 /* 태블릿 반응형 */
@@ -238,39 +376,64 @@ a:active {
     font-size: 14px;
   }
   
-  main {
+  .main {
     padding: 0 1rem;
     margin-top: 100px;
   }
   
-  .bigtext {
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  .title-message {
+    font-size: 20px;
+    text-align: center;
   }
   
-  .feature-section {
-    padding: 2rem 1rem;
+  .landing-circle {
+    width: 800px;
+    height: 800px;
+    top: 150px;
   }
   
-  .feature-list {
-    gap: 1rem;
+  .explain {
+    padding-top: 8rem;
+    gap: 5rem;
   }
   
-  .feature-list li {
-    font-size: 1rem;
-    padding: 0.8rem 1.5rem;
+  .first-ex-text h1,
+  .second-ex-text h1,
+  .third-ex-text h1 {
+    font-size: 20px;
+  }
+  
+  .plan {
+    gap: 3rem;
+  }
+  
+  .plan-title {
+    font-size: 35px;
+  }
+  
+  .plan-free, .plan-pro {
+    width: 100%;
+    max-width: 400px;
+    height: 500px;
+  }
+  
+  .free-title {
+    font-size: 36px;
+  }
+  
+  .plan-button {
+    font-size: 24px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  .explain-text {
+    font-size: 20px;
   }
 }
 
 /* 모바일 반응형 */
 @media (max-width: 480px) {
-  .barheader {
-    justify-content: center;
-    flex-wrap: wrap;
-    height: auto;
-    padding: 0.5rem;
-    gap: 0.5rem;
-  }
-  
   .price {
     order: 1;
   }
@@ -280,14 +443,21 @@ a:active {
     margin-bottom: 0.5rem;
   }
   
-  main {
+  .main {
     margin-top: 120px;
     padding: 0 0.5rem;
   }
   
-  .bigtext {
+  .title-message {
+    font-size: 20px;
     text-align: center;
     margin-bottom: 1.5rem;
+  }
+  
+  .landing-circle {
+    width: 500px;
+    height: 500px;
+    top: 120px;
   }
   
   .signupbutton {
@@ -296,64 +466,49 @@ a:active {
     margin: 0 auto;
   }
   
-  .feature-section {
-    padding: 1.5rem 0.5rem;
+  .explain {
+    padding-top: 5rem;
+    gap: 3rem;
   }
   
-  .feature-list li {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+  .first-ex, .second-ex, .third-ex {
+    align-self: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .shine {
+    margin: 0 auto 1rem auto;
+  }
+  
+  .first-ex-text h1,
+  .second-ex-text h1,
+  .third-ex-text h1 {
+    font-size: 18px;
+    margin: 0.5rem 0;
+  }
+  
+  .plan-free, .plan-pro {
+    padding: 1.5rem;
+    height: auto;
+    min-height: 450px;
+  }
+  
+  .free-title {
+    font-size: 32px;
+  }
+  
+  .plan-button {
+    font-size: 20px;
+    padding: 0.8rem 2rem;
+  }
+  
+  .explain-text {
+    font-size: 16px;
+  }
+  
+  .check {
+    width: 20px;
+    height: 20px;
   }
 }
-
-/* 우측 장식 구체들 */
-.decorative-spheres {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 200vh;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.sphere {
-  position: absolute;
-  animation: float 6s ease-in-out infinite;
-  object-fit: contain;
-}
-
-.sphere-1 {
-  width: 300px;
-  height: 300px;
-  top: 12.5%;
-  right: 30%;
-  animation-delay: 0s;
-}
-
-.sphere-2 {
-  width: 200px;
-  height: 200px;
-  top: 37.5%;
-  right: 55%;
-  animation-delay: 2s;
-}
-
-.sphere-3 {
-  width: 120px;
-  height: 120px;
-  top: 50%;
-  right: 50%;
-  animation-delay: 4s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
-
-

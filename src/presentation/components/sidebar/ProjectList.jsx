@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "./ProjectList.css"; // CSS 파일 import 추가
+import { ChevronRight } from 'lucide-react';
 
 function ProjectList({ projects }) { // 1. props를 { projects }로 구조 분해하여 받습니다.
   const navigate = useNavigate(); // 2. 변수명을 소문자 navigate로 변경합니다.
@@ -10,17 +11,36 @@ function ProjectList({ projects }) { // 1. props를 { projects }로 구조 분�
   }
 
   return (
-    <ul className="project-list">
-      {projects.map((project) => (
-        <li
-          key={project.id}
-          className="project-item" // CSS 클래스를 추가하여 스타일을 적용합니다.
-          onClick={() => navigate(`/project/${project.id}`)} // 3. 소문자 navigate 함수를 사용합니다.
-        >
-          {project.title}
-        </li>
-      ))}
-    </ul>
+
+                <div className="project-list">
+                  <span className="project-list-title">프로젝트 목록</span>
+                  <ul className="project-list-items">
+                    {projects.map((project) => (
+                    <li
+                      key={project.id}
+                      onClick={() => navigate(`/project/${project.id}`)}
+                    >
+                      <div className="project-category">
+                        <div>
+                          <ChevronRight size={16} />
+                          <span>{project.title}</span>
+                        </div>
+                      </div>
+                      <ul className="project-subitems">
+                        {project.subtasks.map((subtask) => (
+                          <li 
+                            key={subtask.id}
+                            className="project-subitem"
+                            onClick={() => navigate(`/subtask/${subtask.id}`)}
+                            >
+                            {subtask.title}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                    ))}
+                  </ul>
+                </div>
   );
 }
 

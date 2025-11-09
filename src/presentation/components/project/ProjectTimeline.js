@@ -10,34 +10,83 @@ import "./styles/ProjectTimeline.css";
 import { subscribeAuth } from '../../../services/auth';
 import { subscribeToUserProjects } from '../../../services/projects';
 
-function ProjectTimeline() {
+function ProjectTimeline({ projects: propsProjects = [] }) {
   // 🔹 현재 시간을 저장 (진행률 계산 기준)
   const [now, setNow] = useState(new Date());
-  
-  // 자체적으로 프로젝트 데이터 관리
-  const [projects, setProjects] = useState([]);
+
+  // 예시 프로젝트 데이터 (시연용)
+  const defaultProjects = [
+    {
+      id: 'demo-1',
+      title: '디자인 시스템 구축',
+      priority: '상',
+      createdAt: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000), // 7일 전
+      deadline: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3일 후
+    },
+    {
+      id: 'demo-2',
+      title: 'API 개발',
+      priority: '중',
+      createdAt: new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000), // 14일 전
+      deadline: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 7일 후
+    },
+    {
+      id: 'demo-3',
+      title: '모바일 앱 최적화',
+      priority: '상',
+      createdAt: new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), // 5일 전
+      deadline: new Date(new Date().getTime() + 10 * 24 * 60 * 60 * 1000), // 10일 후
+    },
+    {
+      id: 'demo-4',
+      title: '데이터베이스 마이그레이션',
+      priority: '중',
+      createdAt: new Date(new Date().getTime() - 21 * 24 * 60 * 60 * 1000), // 21일 전
+      deadline: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000), // 5일 후
+    },
+    {
+      id: 'demo-5',
+      title: '테스트 자동화',
+      priority: '낮음',
+      createdAt: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000), // 3일 전
+      deadline: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), // 14일 후
+    },
+  ];
+
+  // props에서 받은 프로젝트가 있으면 사용, 없으면 예시 데이터 사용
+  const [projects, setProjects] = useState(propsProjects.length > 0 ? propsProjects : defaultProjects);
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Props에서 받은 프로젝트 데이터가 변경되면 업데이트
+  useEffect(() => {
+    if (propsProjects && propsProjects.length > 0) {
+      setProjects(propsProjects);
+    }
+  }, [propsProjects]);
 
   // 사용자 인증 상태 구독
   useEffect(() => {
     const unsubscribe = subscribeAuth((user) => {
       setCurrentUser(user);
-      if (!user) {
-        setProjects([]);
+      if (!user && !propsProjects.length) {
+        setProjects(defaultProjects);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [propsProjects]);
 
   // 사용자의 프로젝트 실시간 구독
   useEffect(() => {
     if (!currentUser) return;
 
     const unsubscribe = subscribeToUserProjects(
-      currentUser.uid, 
+      currentUser.uid,
       ({ projects: userProjects }) => {
-        setProjects(userProjects);
+        // Firebase에서 데이터를 가져왔으면 예시 데이터 대신 실제 데이터 사용
+        if (userProjects && userProjects.length > 0) {
+          setProjects(userProjects);
+        }
       }
     );
 
@@ -117,8 +166,12 @@ function ProjectTimeline() {
           }
         }
                 
+        // 마감일까지의 남은 일수 계산 (D-day 형식)
+        const daysRemaining = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
+        const dLabel = daysRemaining > 0 ? `D-${daysRemaining}` : `D+${Math.abs(daysRemaining)}`;
+
         return (
-          <div key={project.id || index}>
+          <div key={project.id || index} style={{ position: 'relative', width: '100%', height: '100%' }}>
             {/* 타임라인 점 (에러 없을 경우만 표시) */}
             {!errorMsg && (
               <div
@@ -132,13 +185,13 @@ function ProjectTimeline() {
                     : 'normal'
                 }`}
                 style={{
-                  left: `${progressRatio * 100}%`,
+                  left: `calc(${progressRatio * 100}% + 40px)`,
                 }}
-                title={`${project.title} - ${Math.round(progressRatio * 100)}%`}
-              >
-              </div>
+                title={`${project.title} - ${dLabel}`}
+                data-label={dLabel}
+              />
+
             )}
-                      
           </div>
         );
       })}

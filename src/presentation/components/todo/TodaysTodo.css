@@ -1,0 +1,102 @@
+/* TodaysTodo.css - Figma 디자인 기반 */
+
+.todays-todo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(90deg, #2E387E 0%, #171C40 100%);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  color: white;
+  overflow: hidden;
+  gap: 1.25rem;
+}
+
+/* 헤더 섹션 */
+.todo-header-section {
+  flex-shrink: 0;
+}
+
+.todo-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.todo-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: rgba(255, 255, 255, 1);
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+
+.todo-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 1);
+  background: rgba(67, 72, 107, 0.5);
+  padding: 0.6875rem 1.375rem;
+  border-radius: 1.40625rem;
+  font-weight: 400;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  border: 1px solid rgba(67, 72, 107, 0.5);
+}
+
+
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .todays-todo {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .todo-title {
+    font-size: 1.125rem;
+  }
+
+  .task-item {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+
+  .task-text {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .todays-todo {
+    padding: 1rem;
+    gap: 0.875rem;
+  }
+
+  .todo-title {
+    font-size: 1rem;
+  }
+
+  .task-input-section {
+    gap: 0.5rem;
+  }
+
+  .task-item {
+    padding: 0.75rem;
+    flex-direction: column;
+  }
+
+  .progress-wrapper {
+    width: 100%;
+  }
+
+  .task-delete-btn {
+    position: static;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+  }
+}

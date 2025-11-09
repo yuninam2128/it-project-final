@@ -5,9 +5,12 @@ import ProjectList from "./ProjectList.jsx";
 import "./Sidebar.css";
 import { subscribeAuth } from '../../../services/auth';
 import { subscribeToUserProjects } from '../../../services/projects';
+import { Home, Search, UserRound, User, Store, LogOut } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 function Sidebar() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   // 자체적으로 프로젝트 데이터 관리
   const [projects, setProjects] = useState([]);
@@ -39,38 +42,91 @@ function Sidebar() {
     return () => unsubscribe();
   }, [currentUser]);
 
+  // 사이드바 확장 상태
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 중 오류:", error);
+    }
+  };
+
   return (
-    <div className="sidebar">
-      <div className="menu-section">
-        <button 
-          className="game-button search"
-          onClick={() => navigate("/home")}
-        >
-          <img src="/images/homeIcon.png" alt="홈 아이콘"/>
-          <p>홈 화면</p>
-        </button>
-        <button 
-          className="game-button store"
-          onClick={() => navigate("/store", {state: {projects: projects}})}
-        >
-          <img src="/images/storeIcon.png" alt="스토어 아이콘"/>
-          <p>스토어</p>
-        </button>
-        <button 
-          className="game-button logout"
-          onClick={() => navigate("/")}
-        >
-          <img src="/images/signoutIcon.png" alt="로그아웃 아이콘"/>
-          <p>로그아웃</p>
-        </button>
+      <div 
+        className={`sidebar ${sidebarExpanded ? 'sidebar-expanded' : ''}`}
+        onMouseEnter={() => setSidebarExpanded(true)}
+        onMouseLeave={() => setSidebarExpanded(false)}
+      >
+        <div className="sidebar-content">
+          {/* Logo */}
+          <div className="sidebar-logo">
+              <img 
+                src="/images/logo-icon.svg"
+                alt="로고이미지"
+                className="logo-icon"/>
+          </div>
+
+          {/* Menu Items */}
+          <nav className="sidebar-nav">
+            <button 
+              className="nav-item nav-item-inactive"
+            >
+              <Search size={24} strokeWidth={1.5}/>
+              {sidebarExpanded && <span>검색</span>}
+            </button>
+            <button 
+              className="nav-item nav-item-active"
+              onClick={() => navigate("/home")}
+            >
+              <Home size={24} strokeWidth={1.5}/>
+              {sidebarExpanded && <span>메인 프로젝트 홈</span>}
+            </button>
+            <button 
+              className="nav-item nav-item-inactive"
+              onClick={() => navigate("/store", {state : {projects: projects}})}
+            >
+              <Store size={24} strokeWidth={1.5}/>
+              {sidebarExpanded && <span>캐릭터 상점</span>}
+            </button>
+
+            {sidebarExpanded && (
+              <>
+                <div className="nav-divider"></div>
+                {/* Project List */}
+                <ProjectList projects={projects} />
+
+              </>
+            )}
+          </nav>
+
+          {/* User Profile and Logout Container */}
+          <div className="sidebar-bottom">
+            <div className="sidebar-profile">
+              <img 
+                src = "/images/big-profile.png"
+                className="profile-avatar"/>
+              {sidebarExpanded && (
+                <div className="profile-info">
+                  <div className="profile-upgrade">Plan upgrade &gt;</div>
+                </div>
+              )}
+            </div>
+
+            {/* Logout Button */}
+            <button 
+              className="nav-item nav-item-inactive logout-button" 
+              onClick={handleLogout}
+            >
+              <LogOut size={24} strokeWidth={1.5}/>
+              {sidebarExpanded && <span>로그아웃</span>}
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <h3>프로젝트 목록</h3>
-        <ProjectList 
-          projects={projects}
-        />
-      </div>
-    </div>
   );
 }
 

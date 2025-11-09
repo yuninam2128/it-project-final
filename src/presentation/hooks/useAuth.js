@@ -18,11 +18,11 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleSignIn = async (email, password) => {
+  const handleSignIn = async (email, password, keepLoggedIn = false) => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await signIn(email, password);
+      const result = await signIn(email, password, keepLoggedIn);
       return result;
     } catch (error) {
       setError(error.message);
@@ -96,11 +96,11 @@ export const useAuthLegacy = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleSignIn = async (email, password) => {
+  const handleSignIn = async (email, password, keepLoggedIn = false) => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await signIn(email, password);
+      const result = await signIn(email, password, keepLoggedIn);
       return result;
     } catch (error) {
       setError(error.message);

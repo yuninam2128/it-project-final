@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import SubtaskMindmap from "../components/subtask/SubtaskMindmap";
 import SubtaskForm from "../components/subtask/SubtaskForm";
 import "./Detail.css";
 import Header from "../components/header/header";
+import SubtaskTodoList from "../components/todo/SubtaskTodoList";
+import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import TodoManager from "../components/todo/TodoManager";
 import Sidebar from "../components/sidebar/Sidebar";
 import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
+import { subscribeAuth } from "../../services/auth";
+import { getUserCoins, setUserCoins, incrementUserCoins } from "../../services/coins";
 
 
 
@@ -19,8 +23,135 @@ function ProjectDetail() {
     const [subtaskPositions, setSubtaskPositions] = useState({});
     const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     const [showAddForm, setShowAddForm] = useState(false);
+    const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
+    const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수 상태
+    const [currentUser, setCurrentUser] = useState(null); // 현재 사용자
 
     const projectRepository = new FirebaseProjectRepository();
+    const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
+    const processingTodoIdsRef = useRef(new Set()); // 처리 중인 Todo ID 저장 (비동기 중복 방지용)
+
+    // 현재 사용자 구독
+    useEffect(() => {
+        const unsubscribe = subscribeAuth((user) => {
+            setCurrentUser(user);
+        });
+        return () => unsubscribe();
+    }, []);
+    
+        // 젤리 보상 타입을 상태 속성으로 매핑
+    const mapRewardTypeToStateProperty = (type) => {
+      const typeMap = {
+        'heart': 'heart',
+        'fire': 'fire',
+        'star': 'light'  // star 타입을 light 속성으로 변환
+      };
+      return typeMap[type] || type;
+    };
+
+    // 젤리 보상 타입을 Firebase 필드명으로 매핑
+    const mapRewardTypeToFirebaseField = (type) => {
+      const typeMap = {
+        'heart': 'heartJelly',
+        'fire': 'fireJelly',
+        'star': 'lightJelly'  // star 타입을 lightJelly로 변환
+      };
+      return typeMap[type] || null;
+    };
+
+    // 젤리 획득 처리 함수 (useCallback으로 메모이제이션 + 중복 방지)
+    const handleJellyReward = useCallback(async (rewards, todoId) => {
+      console.log('[Detail.jsx] handleJellyReward 호출:', {
+        todoId,
+        rewards,
+        rewardsLength: rewards?.length,
+        isEmpty: !rewards || rewards.length === 0,
+        currentUser: currentUser?.uid
+      });
+      if (!rewards || rewards.length === 0) {
+        console.log('[Detail.jsx] rewards가 비어있음 - return');
+        return;
+      }
+
+      // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
+      // 비동기 처리 중에도 중복 방지를 위해 처리 시작 시점에 체크
+      if (todoId) {
+        if (processedTodoIdsRef.current.has(todoId)) {
+          console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+          return; // 이미 처리된 투두는 보상을 지급하지 않음
+        }
+        if (processingTodoIdsRef.current.has(todoId)) {
+          console.log(`[Detail.jsx] TodoId ${todoId}는 처리 중임 - 중복 방지`);
+          return; // 처리 중인 투두는 보상을 지급하지 않음
+        }
+        // 처리 중인 투두 ID 추가 (비동기 처리 전에 추가하여 중복 방지)
+        processingTodoIdsRef.current.add(todoId);
+      }
+
+      if (!currentUser) {
+        console.warn('[Detail.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
+        // 로그인하지 않아도 팝업은 표시
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+        }
+        setJellyReward(rewards);
+        return;
+      }
+
+      try {
+        // 보상만큼 증가시킬 값 계산
+        const coinIncrements = {
+          fireJelly: 0,
+          lightJelly: 0,
+          heartJelly: 0
+        };
+        
+        rewards.forEach(reward => {
+          const fieldName = mapRewardTypeToFirebaseField(reward.type);
+          if (fieldName) {
+            const rewardAmount = Number(reward.amount);
+            coinIncrements[fieldName] = (coinIncrements[fieldName] || 0) + rewardAmount;
+            console.log(`[Detail.jsx] 젤리 증가: ${reward.type}(${rewardAmount}) -> ${fieldName}: +${coinIncrements[fieldName]}`);
+          }
+        });
+
+        // Firebase에 원자적 증가 연산으로 저장 (경쟁 조건 방지)
+        await incrementUserCoins(currentUser.uid, coinIncrements);
+        console.log('[Detail.jsx] Firebase에 젤리 증가 완료:', coinIncrements);
+        
+        // 현재 값 확인 (로깅용)
+        const currentCoins = await getUserCoins(currentUser.uid);
+        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
+
+        // 처리 완료: 처리 중인 ID를 제거하고 처리된 ID에 추가
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+          processedTodoIdsRef.current.add(todoId);
+        }
+
+        // 로컬 state도 업데이트 (UI 반응성 향상)
+        setJellies(prev => {
+          const updated = { ...prev };
+          rewards.forEach(reward => {
+            const stateProperty = mapRewardTypeToStateProperty(reward.type);
+            updated[stateProperty] = (updated[stateProperty] || 0) + Number(reward.amount);
+          });
+          return updated;
+        });
+      } catch (error) {
+        console.error('[Detail.jsx] 젤리 저장 중 오류:', error);
+        // 오류 발생 시 처리 중인 ID 제거 (재시도 가능하도록)
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+        }
+        // 오류가 발생해도 팝업은 표시
+      }
+
+      // 팝업 표시
+      console.log('[Detail.jsx] setJellyReward 실행:', rewards);
+      setJellyReward(rewards);
+    }, [currentUser]);
+
 
     //중요도에 따른 원 크기
     const getRadius = (priority) => {
@@ -252,49 +383,47 @@ function ProjectDetail() {
         return <div className="loading-container"><p>프로젝트를 불러오는 중...</p></div>;
     }
 
+    //오늘 날짜 출력 
+    const today = new Date();
+    const formatted = today.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 
-  return (
-    <div className="App">
-    <div className="body-detail">
-        <div className="container-detail">
-            {/* 이 부분을 '지우고' sidebar컴포넌트를 넣는다. */}
-            {/* 단, sidebar 컴포넌트 전체를 감싼 div태그 className은 무조건 sidebar로 할 것 */}
-            <div className="sidebar-detail">
-                <Sidebar />
+
+     return (
+    <div className="app-container">
+      <Sidebar/>
+      <div className="main-content">
+        <Header onAddClick={handleAddClick} jellies={jellies}/>
+        <div className="content-grid">
+            <div className="space-map-container">
+                <SubtaskMindmap
+                    project ={project}
+                    positions={subtaskPositions}
+                    onSubtaskClick={handleSubtaskClick}
+                    onEditSubtask={handleEditSubtask}
+                    onDeleteSubtask={handleDeleteSubtask}
+                    onPositionChange={handleSubtaskPositionChange}
+                    onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
+                />
             </div>
-
-            <div className="main-wrapper-detail">
-                <Header onAddClick={handleAddClick}/>    
-                <article className="main-article-detail">
-                        <div className="date-detail">2025년 09월 10일</div>
-                        <div className="title-detail">
-                            <span className="highlight-detail">{project.title}</span>의 행성들을 정복해보아요!
-                        </div>
-                </article>
-                <main className="content-area-detail">
-                    <SubtaskMindmap
-                        project ={project}
-                        positions={subtaskPositions}
-                        onSubtaskClick={handleSubtaskClick}
-                        onEditSubtask={handleEditSubtask}
-                        onDeleteSubtask={handleDeleteSubtask}
-                        onPositionChange={handleSubtaskPositionChange}
-                        onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
-                    />
-                    <TodoManager
+            <div className="right-sidebar">
+                <div className="card card-todo-expanded">
+                    <SubtaskTodoList
                         subtask={selectedSubtask}
+                        projectId={projectId}
                         onUpdateSubtask={handleEditSubtask}
+                        onJellyReward={handleJellyReward}
                     />
-                    {/* <section className="main-content"></section> */}
-                    {/* <section className="todo-bar"></section> */}
-                </main>
+                </div>
+            </div>
+        </div>
+                <ProjectTimeline />
 
-                {/* 마찬가지로 이 부분을 '지우고' 타임라인 컴포넌트를 넣는다. */}
-                {/* 단, timeline 컴포넌트 전체를 감싼 div태그 className은 무조건 timeline로 할 것 */}
-                <footer className="timeline-detail">
-                    <ProjectTimeline />
-                </footer>
-                {showAddForm && (
+      </div>
+                 {showAddForm && (
                     <SubtaskForm
                     onSubmit={(newSubtask) => {
                         handleAddSubtask(newSubtask);
@@ -304,9 +433,12 @@ function ProjectDetail() {
                     />
 
                 )}
-            </div>
-        </div>
-    </div>
+                {jellyReward && (
+                    <JellyRewardPopup
+                        rewards={jellyReward}
+                        onClose={() => setJellyReward(null)}
+                    />
+                )}
     </div>
   );
 }
