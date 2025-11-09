@@ -1,3 +1,6 @@
+/* 폰트 import 추가 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600&family=Open+Sans:wght@300&display=swap');
+
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -109,6 +112,13 @@ html, body, #root {
   font-size: 35px;
 }
 
+/* 텍스트 로고 이미지 크기 지정 */
+.text-logo {
+  max-width: 1000px;
+  height: auto;
+}
+
+/* landing-circle 반응형으로 수정 */
 .landing-circle{
   display: flex;
   justify-content: center;
@@ -116,9 +126,11 @@ html, body, #root {
   position: absolute;
   background-size: cover;
   background-position: center;
-  width: 1500px;
-  height: 1500px;
-  top: 200px;
+  width: 2000px;
+  height: 2000px;
+  max-width: 90vw;
+  max-height: 90vw;
+  top: 250px;
   z-index: 2;
 }
 
@@ -139,15 +151,17 @@ html, body, #root {
   transition: background-color 0.3s ease;
   margin-top: 7.5rem;
   z-index: 3;
+  text-decoration: none;
 }
 
+/* explain 섹션 padding-top 수정 */
 .explain{
   display: flex;
   flex-direction: column;
   position: relative;
   margin-bottom: 5rem;
   gap: 10rem;
-  padding-top: 65rem;
+  padding-top: 15rem; /* 65rem에서 15rem으로 수정 */
   width: 100%;
   z-index: 2;
   font-family: 'Open Sans', sans-serif;
@@ -199,6 +213,13 @@ html, body, #root {
   flex-direction: column;
 }
 
+/* shine 이미지 크기 지정 */
+.shine {
+  width: 50px;
+  height: auto;
+  margin-right: 1rem;
+}
+
 .plan-title{
   font-family: 'Inter', sans-serif;
   font-style: normal;
@@ -210,9 +231,11 @@ html, body, #root {
   margin-top: 5rem;
 }
 
+/* plan 섹션에 flex-wrap 추가 */
 .plan{
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap; /* 화면 작을 때 세로 정렬 */
   z-index: 3;
   align-self: center;
   justify-content: center;
@@ -226,10 +249,12 @@ html, body, #root {
   border-radius: 50px;
   height: 580px;
   width: 535px;
+  max-width: calc(100vw - 4rem); /* 화면보다 작게 */
   display: flex;
   flex-direction: column;
   overflow: auto;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 .plan-pro{
@@ -238,11 +263,13 @@ html, body, #root {
   border-radius: 50px;
   height: 580px;
   width: 535px;
+  max-width: calc(100vw - 4rem); /* 화면보다 작게 */
   display: flex;
   flex-direction: column;
   overflow: auto;
   padding: 2rem;
   background-color: #98989880;
+  box-sizing: border-box;
 }
 
 .free-title{
@@ -273,6 +300,7 @@ html, body, #root {
   border-radius: 50px;
   font-size: 30px;
   font-weight: 500;
+  cursor: pointer;
 }
 
 .plan-explain{
@@ -282,13 +310,16 @@ html, body, #root {
   align-items: center;
 }
 
+/* check 이미지 크기 지정 */
 .check{
   margin-right: 1rem;
+  width: 24px;
+  height: 24px;
 }
 
 .explain-text{
   color: #ffffff;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 300;
 }
 
@@ -306,6 +337,23 @@ a:active {
 
 .signupbutton:hover {
   background: rgba(255, 255, 255, 0.4);
+}
+
+/* 노트북/데스크톱 반응형 (1024px ~ 1440px) */
+@media (max-width: 1440px) {
+  .landing-circle {
+    width: 1200px;
+    height: 1200px;
+  }
+  
+  .explain {
+    padding-top: 50rem;
+  }
+  
+  .plan-free, .plan-pro {
+    width: 450px;
+    height: 540px;
+  }
 }
 
 /* 태블릿 반응형 */
@@ -328,26 +376,59 @@ a:active {
     font-size: 14px;
   }
   
-  main {
+  .main {
     padding: 0 1rem;
     margin-top: 100px;
   }
   
-  .bigtext {
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  .title-message {
+    font-size: 20px;
+    text-align: center;
   }
   
-  .feature-section {
-    padding: 2rem 1rem;
+  .landing-circle {
+    width: 800px;
+    height: 800px;
+    top: 150px;
   }
   
-  .feature-list {
-    gap: 1rem;
+  .explain {
+    padding-top: 8rem;
+    gap: 5rem;
   }
   
-  .feature-list li {
-    font-size: 1rem;
-    padding: 0.8rem 1.5rem;
+  .first-ex-text h1,
+  .second-ex-text h1,
+  .third-ex-text h1 {
+    font-size: 20px;
+  }
+  
+  .plan {
+    gap: 3rem;
+  }
+  
+  .plan-title {
+    font-size: 35px;
+  }
+  
+  .plan-free, .plan-pro {
+    width: 100%;
+    max-width: 400px;
+    height: 500px;
+  }
+  
+  .free-title {
+    font-size: 36px;
+  }
+  
+  .plan-button {
+    font-size: 24px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  .explain-text {
+    font-size: 20px;
   }
 }
 
@@ -362,14 +443,21 @@ a:active {
     margin-bottom: 0.5rem;
   }
   
-  main {
+  .main {
     margin-top: 120px;
     padding: 0 0.5rem;
   }
   
-  .bigtext {
+  .title-message {
+    font-size: 20px;
     text-align: center;
     margin-bottom: 1.5rem;
+  }
+  
+  .landing-circle {
+    width: 500px;
+    height: 500px;
+    top: 120px;
   }
   
   .signupbutton {
@@ -377,5 +465,50 @@ a:active {
     max-width: 300px;
     margin: 0 auto;
   }
+  
+  .explain {
+    padding-top: 5rem;
+    gap: 3rem;
+  }
+  
+  .first-ex, .second-ex, .third-ex {
+    align-self: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .shine {
+    margin: 0 auto 1rem auto;
+  }
+  
+  .first-ex-text h1,
+  .second-ex-text h1,
+  .third-ex-text h1 {
+    font-size: 18px;
+    margin: 0.5rem 0;
+  }
+  
+  .plan-free, .plan-pro {
+    padding: 1.5rem;
+    height: auto;
+    min-height: 450px;
+  }
+  
+  .free-title {
+    font-size: 32px;
+  }
+  
+  .plan-button {
+    font-size: 20px;
+    padding: 0.8rem 2rem;
+  }
+  
+  .explain-text {
+    font-size: 16px;
+  }
+  
+  .check {
+    width: 20px;
+    height: 20px;
+  }
 }
-
