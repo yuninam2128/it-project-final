@@ -55,6 +55,38 @@ function CharacterGrid({ characters, onSelect }) {
     return true;
   }, [jellyCoins]);
 
+  // 이미지 경로를 업데이트하는 함수 (구버전 경로를 새 경로로 변환)
+  const updateCharacterImagePath = useCallback((character) => {
+    if (!character) return character;
+    
+    // id에 따라 올바른 경로 설정 (항상 id 기반으로 경로 설정)
+    const charImageMap = {
+      1: '/images/char1.png',
+      2: '/images/char2.png',
+      3: '/images/char3.png',
+      4: '/images/char4.png',
+    };
+    
+    // id가 있으면 항상 id에 맞는 경로로 설정
+    if (character.id && charImageMap[character.id]) {
+      return { ...character, image: charImageMap[character.id] };
+    }
+    
+    // 구버전 경로를 새 경로로 변환 (id가 없는 경우 대비)
+    const imagePathMap = {
+      '/images/character1.png': '/images/char1.png',
+      '/images/character2.png': '/images/char2.png',
+      '/images/character3.png': '/images/char3.png',
+      '/images/character4.png': '/images/char4.png',
+    };
+    
+    if (character.image && imagePathMap[character.image]) {
+      return { ...character, image: imagePathMap[character.image] };
+    }
+    
+    return character;
+  }, []);
+
   // 사용자 인증 상태 감지
   useEffect(() => {
     const unsubscribe = subscribeAuth(async (user) => {
@@ -65,9 +97,39 @@ function CharacterGrid({ characters, onSelect }) {
           const characterData = await getUserCharacterData(user.uid);
           // characterData가 있고 unlockedCharacters가 존재하며 비어있지 않으면 사용
           if (characterData && characterData.unlockedCharacters && characterData.unlockedCharacters.length > 0) {
-            setUnlockedCharacters(characterData.unlockedCharacters);
+            // 이미지 경로 업데이트
+            const updatedCharacters = characterData.unlockedCharacters.map(updateCharacterImagePath);
+            const updatedSelectedCharacter = characterData.selectedCharacter 
+              ? updateCharacterImagePath(characterData.selectedCharacter)
+              : null;
+            
+            // characters prop과 병합하여 누락된 캐릭터 추가
+            // 이름, 이미지, 가격은 항상 prop에서 가져오고, 해금 상태만 Firebase에서 가져옴
+            const mergedCharacters = (characters || []).map(char => {
+              const existingChar = updatedCharacters.find(c => c.id === char.id);
+              if (existingChar) {
+                // Firebase에 있는 데이터와 prop 데이터 병합
+                // 이름, 이미지, 가격은 prop에서 가져오고, 해금 상태는 prop의 unlocked가 false이고 price가 있으면 false 유지
+                // (가격을 표시하기 위해)
+                const shouldKeepLocked = char.unlocked === false && char.price && Object.values(char.price).some(cost => cost > 0);
+                const finalUnlocked = shouldKeepLocked ? false : (existingChar.unlocked !== undefined ? existingChar.unlocked : char.unlocked);
+                return {
+                  ...char, // prop의 이름, 이미지, 가격 등 최신 정보 사용
+                  unlocked: finalUnlocked,
+                };
+              } else {
+                // Firebase에 없는 캐릭터는 prop에서 가져오기
+                return updateCharacterImagePath(char);
+              }
+            });
+            
+            setUnlockedCharacters(mergedCharacters.length > 0 ? mergedCharacters : updatedCharacters);
             setNickname(characterData.nickname || '내이름은뿌꾸');
-            setSelectedCharacter(characterData.selectedCharacter || characterData.unlockedCharacters.find(char => char.unlocked) || null);
+            // 선택된 캐릭터도 병합된 데이터에서 찾기
+            const finalSelectedCharacter = updatedSelectedCharacter 
+              ? mergedCharacters.find(c => c.id === updatedSelectedCharacter.id) || updatedSelectedCharacter
+              : mergedCharacters.find(char => char.unlocked) || mergedCharacters[0] || null;
+            setSelectedCharacter(finalSelectedCharacter);
           } else {
             // 첫 로그인이거나 데이터가 없는 경우 초기 데이터 설정
             // characters prop을 사용하여 초기화
@@ -102,15 +164,22 @@ function CharacterGrid({ characters, onSelect }) {
         const savedNickname = localStorage.getItem('userNickname');
         const savedSelected = localStorage.getItem('selectedCharacter');
         
-        if (savedCharacters) setUnlockedCharacters(JSON.parse(savedCharacters));
+        if (savedCharacters) {
+          const parsedChars = JSON.parse(savedCharacters);
+          const updatedChars = parsedChars.map(updateCharacterImagePath);
+          setUnlockedCharacters(updatedChars);
+        }
         if (savedNickname) setNickname(savedNickname);
-        if (savedSelected) setSelectedCharacter(JSON.parse(savedSelected));
+        if (savedSelected) {
+          const parsedSelected = JSON.parse(savedSelected);
+          setSelectedCharacter(updateCharacterImagePath(parsedSelected));
+        }
       }
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [characters]);
+  }, [characters, updateCharacterImagePath]);
 
   // 젤리 코인 실시간 구독
   useEffect(() => {
@@ -169,29 +238,7 @@ function CharacterGrid({ characters, onSelect }) {
     return () => clearTimeout(timeoutId);
   }, [user, selectedCharacter, unlockedCharacters, isLoading, nickname]);
 
-  // 자동 해금 체크 및 업데이트 (임시 코인 로직 제거됨)
-  useEffect(() => {
-    setUnlockedCharacters(prevCharacters => 
-      prevCharacters.map(character => {
-        if (!character.unlocked && canUnlock(character)) {
-          // 해금 애니메이션 시작
-          setUnlockingCharacters(prev => new Set([...prev, character.id]));
-          
-          // 2초 후 애니메이션 완료
-          setTimeout(() => {
-            setUnlockingCharacters(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(character.id);
-              return newSet;
-            });
-          }, 2000);
-          
-          return { ...character, unlocked: true };
-        }
-        return character;
-      })
-    );
-  }, [canUnlock]);
+  // 자동 해금 로직 제거됨 - 사용자가 직접 클릭하여 구매해야 함
 
   // 캐릭터 선택 함수
   const handleCharacterSelect = async (character) => {
@@ -410,10 +457,18 @@ function CharacterGrid({ characters, onSelect }) {
               } ${selectedCharacter?.id === character.id ? "selected" : ""}`}
               onClick={() => handleCharacterSelect(character)}
             >
-              <img src={character.image} alt={character.name} className="character-image" />
+              <img 
+                src={character.image} 
+                alt={character.name} 
+                className="character-image"
+                onError={(e) => {
+                  console.error('이미지 로드 실패:', character.image);
+                  e.target.style.display = 'none';
+                }}
+              />
               <div className="character-name">{character.name}</div>
               {/* 젤리 코인 가격 표시 */}
-              {!character.unlocked && character.price && (
+              {!character.unlocked && character.price && Object.values(character.price).some(cost => cost > 0) && (
                 <div className="unlock-cost">
                   {Object.entries(character.price).map(([jellyType, cost]) => (
                     <div key={jellyType} className={`cost-item ${jellyType}`}>
