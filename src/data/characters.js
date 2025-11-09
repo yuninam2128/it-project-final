@@ -27,7 +27,7 @@ export const characters = [
     image: '/images/char3.png',
     unlocked: false,
     price: {
-      fireJelly: 300,
+      fireJelly: 0,
       lightJelly: 0,
       heartJelly: 200
     },
