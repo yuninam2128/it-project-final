@@ -1,36 +1,13 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import "./LandingPage.css";
-import { useAuth } from "../hooks/useAuth";
 
 function LandingPage() {
-  const navigate = useNavigate();
-  const { user, isLoading } = useAuth();
-
-  // 로그인 상태 확인 및 자동 리다이렉트
-  useEffect(() => {
-    if (!isLoading && user) {
-      // 이미 로그인되어 있으면 메인 화면으로 리다이렉트
-      navigate("/home");
-    }
-  }, [user, isLoading, navigate]);
-
-  // 로딩 중이면 아무것도 표시하지 않음
-  if (isLoading) {
-    return null;
-  }
-
   return (
     <div className="Background"> {/* 배경 클래스 적용 */}
       <header className="barheader">
-        {/* 로고 */}
-        <div className="logo-container">
-          <img src="/images/Logo.png" alt="CosMove Logo" className="logo" />
-          <img src="/images/COSMOVE.png" alt="CosMove Text" className="logo-text" />
-        </div>
         
         <div className="price">
-          <span className="pricetext">가격플랜</span>
           <Link to="/login" className="logintext">로그인</Link>
         </div>
 
@@ -40,27 +17,75 @@ function LandingPage() {
         </Link> 
       </header>
 
-      <main>
-        <h1 className="bigtext">재밌고 직관적인<br/>장기적 프로젝트 웹</h1>
-        <Link to="/signup">
-          <button className="signupbutton">회원가입</button>
-        </Link>
-      </main>
+      <div className="main">
+        <div className="landing-title">
+          <h1 className="title-message">장기 프로젝트를 달성하며 정복하는 당신의 우주</h1>
+          <img src="/images/cosmove-text.png" alt="cosmove-text" className="text-logo"/>
+        </div>
 
-      <section className="feature-section">
-        <h2 className="text1">이러한 효과를 경험할 수 있으실 겁니다.</h2>
-        <ul className="feature-list">
-          <li>할 일의 시각화</li>
-          <li>생산성 향상</li>
-          <li>시간 관리 능력 향상</li>
-        </ul>
-      </section>
-      
-      {/* 우측 장식 구체들 */}
-      <div className="decorative-spheres">
-        <img src="/images/circle1.png" alt="decoration" className="sphere sphere-1" />
-        <img src="/images/circle2.png" alt="decoration" className="sphere sphere-2" />
-        <img src="/images/circle3.png" alt="decoration" className="sphere sphere-3" />
+        <img src="/images/pj-high.png" alt="landing-circle" className="landing-circle" />
+
+        <Link to="/signup" className="signupbutton">
+          회원가입
+        </Link>
+
+        <div className="explain">
+          <div className="first-ex">
+            <img src="/images/landing-shine.png" alt="shine" className="shine"/>
+            <div className="first-ex-text">
+              <h1>마인드맵을 통한</h1>
+              <h1>비선형적 프로젝트 관리</h1>
+            </div>
+          </div>
+
+          <div className="second-ex">
+            <img src="/images/landing-shine.png" alt="shine" className="shine"/>
+            <div className="second-ex-text">
+              <h1>단계별로 성취하는</h1>
+              <h1>투두리스트</h1>
+            </div>
+          </div>
+
+          <div className="third-ex">
+            <img src="/images/landing-shine.png" alt="shine" className="shine"/>
+            <div className="third-ex-text">
+              <h1>쉽고 재미있는</h1>
+              <h1>목표 달성</h1>
+            </div>
+          </div>
+        </div>
+
+        <h1 className="plan-title">가격 플랜</h1>
+
+        <div className="plan">
+          <div className="plan-free">
+            <h1 className="free-title">Free</h1>
+            <h1 className="plan-price">₩0 | Month</h1>
+            <button className="plan-button">시작하기</button>
+            <div className="plan-explain">
+              <img src="/images/check.png" alt="check" className="check"/>
+              <h1 className="explain-text">생성 가능한 프로젝트 개수 3개</h1>
+            </div>
+            <div className="plan-explain">
+              <img src="/images/check.png" alt="check" className="check"/>
+              <h1 className="explain-text">광고 시청 필수</h1>
+            </div>
+          </div>
+
+          <div className="plan-pro">
+            <h1 className="free-title">Pro</h1>
+            <h1 className="plan-price">₩1,000 | Month</h1>
+            <button className="plan-button">시작하기</button>
+            <div className="plan-explain">
+              <img src="/images/check.png" alt="check" className="check"/>
+              <h1 className="explain-text">생성 가능한 프로젝트 개수 무제한</h1>
+            </div>
+            <div className="plan-explain">
+              <img src="/images/check.png" alt="check" className="check"/>
+              <h1 className="explain-text">광고 제거</h1>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
