@@ -1,8 +1,25 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./LandingPage.css";
+import { useAuth } from "../hooks/useAuth";
 
 function LandingPage() {
+  const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+
+  // 로그인 상태 확인 및 자동 리다이렉트
+  useEffect(() => {
+    if (!isLoading && user) {
+      // 이미 로그인되어 있으면 메인 화면으로 리다이렉트
+      navigate("/home");
+    }
+  }, [user, isLoading, navigate]);
+
+  // 로딩 중이면 아무것도 표시하지 않음
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <div className="Background"> {/* 배경 클래스 적용 */}
       <header className="barheader">

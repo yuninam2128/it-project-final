@@ -13,8 +13,8 @@ export const getCurrentUser = () => {
   return authService.getCurrentUser();
 };
 
-export const signIn = async (email, password) => {
-  return await authService.signIn(email, password);
+export const signIn = async (email, password, keepLoggedIn = false) => {
+  return await authService.signIn(email, password, keepLoggedIn);
 };
 
 export const signUp = async (email, password, displayName, username) => {
