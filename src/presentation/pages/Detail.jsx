@@ -28,7 +28,7 @@ function ProjectDetail() {
     const [currentUser, setCurrentUser] = useState(null); // 현재 사용자
 
     const projectRepository = new FirebaseProjectRepository();
-    //const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
+    const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
 
     // 현재 사용자 구독
     useEffect(() => {
@@ -72,6 +72,17 @@ function ProjectDetail() {
         return;
       }
 
+      // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
+      if (todoId && processedTodoIdsRef.current.has(todoId)) {
+        console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+        return; // 이미 처리된 투두는 보상을 지급하지 않음
+      }
+
+      // 처리된 투두 ID 추가
+      if (todoId) {
+        processedTodoIdsRef.current.add(todoId);
+      }
+
       if (!currentUser) {
         console.warn('[Detail.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
         // 로그인하지 않아도 팝업은 표시
@@ -89,8 +100,11 @@ function ProjectDetail() {
         rewards.forEach(reward => {
           const fieldName = mapRewardTypeToFirebaseField(reward.type);
           if (fieldName) {
-            updatedCoins[fieldName] = (updatedCoins[fieldName] || 0) + reward.amount;
-            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${reward.amount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+            // 명시적으로 Number로 변환하여 계산
+            const currentAmount = Number(updatedCoins[fieldName] || 0);
+            const rewardAmount = Number(reward.amount);
+            updatedCoins[fieldName] = currentAmount + rewardAmount;
+            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
           }
         });
 
@@ -103,7 +117,7 @@ function ProjectDetail() {
           const updated = { ...prev };
           rewards.forEach(reward => {
             const stateProperty = mapRewardTypeToStateProperty(reward.type);
-            updated[stateProperty] = (updated[stateProperty] || 0) + reward.amount;
+            updated[stateProperty] = (updated[stateProperty] || 0) + Number(reward.amount);
           });
           return updated;
         });
@@ -409,60 +423,3 @@ function ProjectDetail() {
 }
 
 export default ProjectDetail;
-
-    /*
-  return (
-    <div className="App">
-    <div className="body-detail">
-        <div className="container-detail">
-            <div className="sidebar-detail">
-                <Sidebar />
-            </div>
-
-            <div className="main-wrapper-detail">
-                <Header onAddClick={handleAddClick}/>    
-                <article className="main-article-detail">
-                        <div className="date-detail">2025년 09월 10일</div>
-                        <div className="title-detail">
-                            <span className="highlight-detail">{project.title}</span>의 행성들을 정복해보아요!
-                        </div>
-                </article>
-                <main className="content-area-detail">
-                    <SubtaskMindmap
-                        project ={project}
-                        positions={subtaskPositions}
-                        onSubtaskClick={handleSubtaskClick}
-                        onEditSubtask={handleEditSubtask}
-                        onDeleteSubtask={handleDeleteSubtask}
-                        onPositionChange={handleSubtaskPositionChange}
-                        onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
-                    />
-                    <TodoManager
-                        subtask={selectedSubtask}
-                        onUpdateSubtask={handleEditSubtask}
-                    />
-    
-                </main>
-
-                <footer className="timeline-detail">
-                    <ProjectTimeline />
-                </footer>
-                {showAddForm && (
-                    <SubtaskForm
-                    onSubmit={(newSubtask) => {
-                        handleAddSubtask(newSubtask);
-                        setShowAddForm(false);
-                    }}
-                    onClose={handleFormClose}
-                    />
-
-                )}
-            </div>
-        </div>
-    </div>
-    </div>
-  );
-}
-
-export default ProjectDetail;
-*/

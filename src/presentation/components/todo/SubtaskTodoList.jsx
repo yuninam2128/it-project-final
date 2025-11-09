@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import TodoBox from "./TodoBox";
 import "./SubtaskTodoList.css";
 import { calculateTodoReward, calculateSubtaskReward } from "../../../utils/jellyRewardCalculator";
@@ -11,6 +11,7 @@ function SubtaskTodoList({ subtask, projectId, onUpdateSubtask, onJellyReward })
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // 0~4 (주차 인덱스)
   const [wasSubtaskComplete, setWasSubtaskComplete] = useState(false); // 세부프로젝트 완료 상태 추적
+  const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
 
   // 날짜를 YYYY-MM-DD 형식으로 변환
   const formatDate = (date) => {
@@ -223,9 +224,18 @@ function SubtaskTodoList({ subtask, projectId, onUpdateSubtask, onJellyReward })
 
   // 투두 완료 핸들러
   const handleTodoComplete = (todoId, updatedTodos) => {
+    // 중복 방지: 이미 처리된 투두는 보상을 지급하지 않음
+    if (processedTodoIdsRef.current.has(todoId)) {
+      console.log(`[SubtaskTodoList] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+      return;
+    }
+
     // 완료된 투두 찾기
     const completedTodo = updatedTodos.find(t => t.id === todoId);
     if (!completedTodo) return;
+
+    // 처리된 투두 ID 추가 (보상 계산 전에 추가하여 중복 방지)
+    processedTodoIdsRef.current.add(todoId);
 
     // 투두 완료 보상 계산
     const todoRewards = calculateTodoReward(completedTodo, updatedTodos, subtask, new Date());
