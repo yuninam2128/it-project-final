@@ -28,7 +28,7 @@ function Inspiration () {
             {showPopup && randomCard && (
                 <div className="modal-overlay" onClick={closePopup}>
                     <div className="modal inspiration-popup" onClick={(e) => e.stopPropagation()}>
-                        <img src={randomCard} alt="Inspiration Card" />
+                        <img src={randomCard.image} alt={randomCard.title || "Inspiration Card"} />
                         <button onClick={closePopup}>닫기</button>
                     </div>
                 </div>

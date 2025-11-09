@@ -1,6 +1,6 @@
 // Mock Projects Service - Firebase 없이 프론트엔드 개발용
 // 실제 Firebase 서비스와 동일한 인터페이스 제공
-
+/*
 import { loadMockData, saveMockData } from './mockData';
 
 let mockProjects = loadMockData();
@@ -298,3 +298,4 @@ export const resetMockProjects = () => {
   notifyListeners();
   console.log('✅ Mock: 데이터 초기화됨');
 };
+*/

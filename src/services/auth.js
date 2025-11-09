@@ -13,8 +13,8 @@ export const getCurrentUser = () => {
   return authService.getCurrentUser();
 };
 
-export const signIn = async (email, password) => {
-  return await authService.signIn(email, password);
+export const signIn = async (email, password, keepLoggedIn = false) => {
+  return await authService.signIn(email, password, keepLoggedIn);
 };
 
 export const signUp = async (email, password, displayName, username) => {
@@ -23,6 +23,14 @@ export const signUp = async (email, password, displayName, username) => {
 
 export const signOut = async () => {
   return await authService.signOut();
+};
+
+export const sendPasswordReset = async (email) => {
+  return await authService.sendPasswordResetEmail(email);
+};
+
+export const findEmailByUsername = async (username) => {
+  return await authService.findEmailByUsername(username);
 };
 
 export const updateUserProfile = async (displayName, photoURL) => {

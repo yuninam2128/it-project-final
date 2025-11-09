@@ -15,6 +15,10 @@ function CharacterDisplay({ character }) {
         src={character.image}
         alt={character.name}
         className="character-visual-inside"
+        onError={(e) => {
+          console.error('이미지 로드 실패:', character.image);
+          e.target.style.display = 'none';
+        }}
       />
     </div>
   );

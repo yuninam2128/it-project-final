@@ -1,5 +1,5 @@
 // Mock Auth Service - Firebase 없이 프론트엔드 개발용
-
+/*
 import { loadMockUser, saveMockUser } from './mockData';
 
 let currentUser = null;
@@ -120,3 +120,4 @@ export const updateUserProfile = async (displayName, photoURL) => {
 // 별칭 (기존 코드 호환성)
 export const signInWithEmail = signIn;
 export const signUpWithEmail = signUp;
+*/

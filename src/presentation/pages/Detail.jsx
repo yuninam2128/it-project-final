@@ -6,9 +6,12 @@ import "./Detail.css";
 import Header from "../components/header/header";
 import SubtaskTodoList from "../components/todo/SubtaskTodoList";
 import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
+import TodoManager from "../components/todo/TodoManager";
 import Sidebar from "../components/sidebar/Sidebar";
-import { MockProjectRepository } from "../../infrastructure/repositories/MockProjectRepository";
+import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
+import { subscribeAuth } from "../../services/auth";
+import { getUserCoins, setUserCoins } from "../../services/coins";
 
 
 
@@ -22,11 +25,20 @@ function ProjectDetail() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
     const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수 상태
+    const [currentUser, setCurrentUser] = useState(null); // 현재 사용자
 
-    const projectRepository = new MockProjectRepository();
+    const projectRepository = new FirebaseProjectRepository();
     const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
 
-    // 젤리 보상 타입을 상태 속성으로 매핑
+    // 현재 사용자 구독
+    useEffect(() => {
+        const unsubscribe = subscribeAuth((user) => {
+            setCurrentUser(user);
+        });
+        return () => unsubscribe();
+    }, []);
+    
+        // 젤리 보상 타입을 상태 속성으로 매핑
     const mapRewardTypeToStateProperty = (type) => {
       const typeMap = {
         'heart': 'heart',
@@ -36,13 +48,24 @@ function ProjectDetail() {
       return typeMap[type] || type;
     };
 
+    // 젤리 보상 타입을 Firebase 필드명으로 매핑
+    const mapRewardTypeToFirebaseField = (type) => {
+      const typeMap = {
+        'heart': 'heartJelly',
+        'fire': 'fireJelly',
+        'star': 'lightJelly'  // star 타입을 lightJelly로 변환
+      };
+      return typeMap[type] || null;
+    };
+
     // 젤리 획득 처리 함수 (useCallback으로 메모이제이션 + 중복 방지)
-    const handleJellyReward = useCallback((rewards, todoId) => {
+    const handleJellyReward = useCallback(async (rewards, todoId) => {
       console.log('[Detail.jsx] handleJellyReward 호출:', {
         todoId,
         rewards,
         rewardsLength: rewards?.length,
-        isEmpty: !rewards || rewards.length === 0
+        isEmpty: !rewards || rewards.length === 0,
+        currentUser: currentUser?.uid
       });
       if (!rewards || rewards.length === 0) {
         console.log('[Detail.jsx] rewards가 비어있음 - return');
@@ -52,31 +75,62 @@ function ProjectDetail() {
       // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
       if (todoId && processedTodoIdsRef.current.has(todoId)) {
         console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+        return; // 이미 처리된 투두는 보상을 지급하지 않음
+      }
+
+      // 처리된 투두 ID 추가
+      if (todoId) {
+        processedTodoIdsRef.current.add(todoId);
+      }
+
+      if (!currentUser) {
+        console.warn('[Detail.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
+        // 로그인하지 않아도 팝업은 표시
+        setJellyReward(rewards);
         return;
       }
 
-      // 처리한 TodoId 저장
-      if (todoId) {
-        processedTodoIdsRef.current.add(todoId);
-        console.log(`[Detail.jsx] TodoId ${todoId} 저장됨. 현재 처리된 Todo: ${Array.from(processedTodoIdsRef.current).join(', ')}`);
+      try {
+        // 현재 사용자의 젤리 보유 수 가져오기
+        const currentCoins = await getUserCoins(currentUser.uid);
+        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
+
+        // 보상만큼 더하기
+        const updatedCoins = { ...currentCoins };
+        rewards.forEach(reward => {
+          const fieldName = mapRewardTypeToFirebaseField(reward.type);
+          if (fieldName) {
+            // 명시적으로 Number로 변환하여 계산
+            const currentAmount = Number(updatedCoins[fieldName] || 0);
+            const rewardAmount = Number(reward.amount);
+            updatedCoins[fieldName] = currentAmount + rewardAmount;
+            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+          }
+        });
+
+        // Firebase에 저장
+        await setUserCoins(currentUser.uid, updatedCoins);
+        console.log('[Detail.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+
+        // 로컬 state도 업데이트 (UI 반응성 향상)
+        setJellies(prev => {
+          const updated = { ...prev };
+          rewards.forEach(reward => {
+            const stateProperty = mapRewardTypeToStateProperty(reward.type);
+            updated[stateProperty] = (updated[stateProperty] || 0) + Number(reward.amount);
+          });
+          return updated;
+        });
+      } catch (error) {
+        console.error('[Detail.jsx] 젤리 저장 중 오류:', error);
+        // 오류가 발생해도 팝업은 표시
       }
 
-      // 젤리 카운트 업데이트 (타입 매핑 적용) - 먼저 실행
-      setJellies(prev => {
-        const updated = { ...prev };
-        rewards.forEach(reward => {
-          const stateProperty = mapRewardTypeToStateProperty(reward.type);
-          updated[stateProperty] = (updated[stateProperty] || 0) + reward.amount;
-          console.log(`[Detail.jsx] 젤리 업데이트: ${reward.type}(${reward.amount}) -> ${stateProperty}`);
-        });
-        console.log('[Detail.jsx] 업데이트된 jellies state:', updated);
-        return updated;
-      });
-
-      // 팝업 표시는 별도로 - 이것이 리렌더링을 트리거할 수 있으므로 마지막에
+      // 팝업 표시
       console.log('[Detail.jsx] setJellyReward 실행:', rewards);
       setJellyReward(rewards);
-    }, []);
+    }, [currentUser]);
+
 
     //중요도에 따른 원 크기
     const getRadius = (priority) => {
@@ -309,26 +363,19 @@ function ProjectDetail() {
     }
 
     //오늘 날짜 출력 
-        const today = new Date();
-        const formatted = today.toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+    const today = new Date();
+    const formatted = today.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 
 
-  return (
+     return (
     <div className="app-container">
       <Sidebar/>
       <div className="main-content">
         <Header onAddClick={handleAddClick} jellies={jellies}/>
-        {/* Date and Title */}
-        <div className="title-section">
-            <div className="date-text">2025년 09월 10일</div>
-            <h1 className="main-title">
-            남지윤님, <span className="title-highlight">오늘은 어떤 우주를 정복해볼까요?</span>
-            </h1>
-        </div>
         <div className="content-grid">
             <div className="space-map-container">
                 <SubtaskMindmap
@@ -376,57 +423,3 @@ function ProjectDetail() {
 }
 
 export default ProjectDetail;
-
-    // <div className="App">
-    // <div className="body-detail">
-    //     <div className="container-detail">
-    //             <Sidebar />
-
-    //         <div className="main-wrapper-detail">
-    //             <Header onAddClick={handleAddClick} jellies={jellies} />    
-    //             <article className="main-article-detail">
-    //                     <div className="date-detail">{formatted}</div>
-    //                     <div className="title-detail">
-    //                         <span className="highlight-detail">{project.title}</span>의 행성들을 정복해보아요!
-    //                     </div>
-    //             </article>
-    //             <main className="content-area-detail">
-    //                 <SubtaskMindmap
-    //                     project ={project}
-    //                     positions={subtaskPositions}
-    //                     onSubtaskClick={handleSubtaskClick}
-    //                     onEditSubtask={handleEditSubtask}
-    //                     onDeleteSubtask={handleDeleteSubtask}
-    //                     onPositionChange={handleSubtaskPositionChange}
-    //                     onCanvasResize={(w,h)=> setCanvasSize({width:w, height:h})}
-    //                 />
-    //                 <SubtaskTodoList
-    //                     subtask={selectedSubtask}
-    //                     projectId={projectId}
-    //                     onUpdateSubtask={handleEditSubtask}
-    //                     onJellyReward={handleJellyReward}
-    //                 />
-    //             </main>
-    //             <footer className="timeline-detail">
-    //                 <ProjectTimeline />
-    //             </footer>
-    //             {showAddForm && (
-    //                 <SubtaskForm
-    //                 onSubmit={(newSubtask) => {
-    //                     handleAddSubtask(newSubtask);
-    //                     setShowAddForm(false);
-    //                 }}
-    //                 onClose={handleFormClose}
-    //                 />
-
-    //             )}
-    //             {jellyReward && (
-    //                 <JellyRewardPopup
-    //                     rewards={jellyReward}
-    //                     onClose={() => setJellyReward(null)}
-    //                 />
-    //             )}
-    //         </div>
-    //     </div>
-    // </div>
-    // </div>

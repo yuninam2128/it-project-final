@@ -1,7 +1,11 @@
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
-const defaultCoins = { A: 0, B: 0, C: 0, D: 0 };
+const defaultCoins = { 
+  fireJelly: 0,    // 불꽃젤리
+  lightJelly: 0,   // 빛나는 젤리  
+  heartJelly: 0    // 하트젤리
+};
 
 export const subscribeUserCoins = (userId, callback) => {
   if (!userId) return () => callback(defaultCoins);
@@ -31,11 +35,10 @@ export const setUserCoins = async (userId, coins) => {
   const ref = doc(db, 'users', userId);
   const snap = await getDoc(ref);
   const payload = {
-    coins: {
-      A: Number(coins?.A ?? 0),
-      B: Number(coins?.B ?? 0),
-      C: Number(coins?.C ?? 0),
-      D: Number(coins?.D ?? 0)
+ coins: {
+      fireJelly: Number(coins?.fireJelly ?? defaultCoins.fireJelly),
+      lightJelly: Number(coins?.lightJelly ?? defaultCoins.lightJelly),
+      heartJelly: Number(coins?.heartJelly ?? defaultCoins.heartJelly)
     },
     updatedAt: serverTimestamp()
   };

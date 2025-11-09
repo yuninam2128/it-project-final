@@ -4,17 +4,45 @@
 export const characters = [
   {
     id: 1,
-    name: '기본 캐릭터',
-    image: '/images/character1.png',
+    name: '뿌꾸',
+    image: '/images/char1.png',
     unlocked: true,
-    unlockCost: { A: 0, B: 0, C: 0, D: 0 }
+    price: null, // 가격이 없으면 해금됨
   },
   {
     id: 2,
-    name: '프리미엄 캐릭터',
-    image: '/images/character2.png', 
+    name: '찌비',
+    image: '/images/char2.png', 
     unlocked: false,
-    unlockCost: { A: 5, B: 3, C: 2, D: 1 }
+    price: {
+      fireJelly: 500,
+      lightJelly: 300,
+      heartJelly: 700
+    },
+  
+  },
+  {
+    id: 3,
+    name: '삐요',
+    image: '/images/char3.png',
+    unlocked: false,
+    price: {
+      fireJelly: 300,
+      lightJelly: 0,
+      heartJelly: 200
+    },
+  },
+  {
+    id: 4,
+    name: '푸미',
+    image: '/images/char4.png', 
+    unlocked: false,
+    price: {
+      lightJelly: 1000,
+      fireJelly: 500,
+      heartJelly: 1500
+    },
+
   }
 ];
 

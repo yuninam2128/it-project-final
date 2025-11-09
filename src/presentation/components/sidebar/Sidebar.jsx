@@ -5,10 +5,12 @@ import ProjectList from "./ProjectList.jsx";
 import "./Sidebar.css";
 import { subscribeAuth } from '../../../services/auth';
 import { subscribeToUserProjects } from '../../../services/projects';
-import { Home, Search, UserRound, User, Store } from 'lucide-react';
+import { Home, Search, UserRound, User, Store, LogOut } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 function Sidebar() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   // 자체적으로 프로젝트 데이터 관리
   const [projects, setProjects] = useState([]);
@@ -42,6 +44,16 @@ function Sidebar() {
 
   // 사이드바 확장 상태
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 중 오류:", error);
+    }
+  };
 
   return (
       <div 
@@ -91,17 +103,27 @@ function Sidebar() {
             )}
           </nav>
 
-          {/* User Profile */}
-          <div className="sidebar-profile">
-            <img 
-              src = "/images/big-profile.png"
-              className="profile-avatar"/>
-            {sidebarExpanded && (
-              <div className="profile-info">
-                <div className="profile-name">남지윤</div>
-                <div className="profile-upgrade">Plan upgrade &gt;</div>
-              </div>
-            )}
+          {/* User Profile and Logout Container */}
+          <div className="sidebar-bottom">
+            <div className="sidebar-profile">
+              <img 
+                src = "/images/big-profile.png"
+                className="profile-avatar"/>
+              {sidebarExpanded && (
+                <div className="profile-info">
+                  <div className="profile-upgrade">Plan upgrade &gt;</div>
+                </div>
+              )}
+            </div>
+
+            {/* Logout Button */}
+            <button 
+              className="nav-item nav-item-inactive logout-button" 
+              onClick={handleLogout}
+            >
+              <LogOut size={24} strokeWidth={1.5}/>
+              {sidebarExpanded && <span>로그아웃</span>}
+            </button>
           </div>
         </div>
       </div>

@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import TodoBox from "./TodoBox";
 import "./SubtaskTodoList.css";
 import { calculateTodoReward, calculateSubtaskReward } from "../../../utils/jellyRewardCalculator";
+import { subscribeToSubtaskTodos, addSubtaskTodo, updateSubtaskTodo, deleteSubtaskTodo } from "../../../services/projects";
 
-function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
+function SubtaskTodoList({ subtask, projectId, onUpdateSubtask, onJellyReward }) {
   const [todos, setTodos] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // 0~11
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // 0~4 (주차 인덱스)
   const [wasSubtaskComplete, setWasSubtaskComplete] = useState(false); // 세부프로젝트 완료 상태 추적
+  const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
 
   // 날짜를 YYYY-MM-DD 형식으로 변환
   const formatDate = (date) => {
@@ -43,29 +45,41 @@ function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
     return days;
   };
 
-  // subtask의 todos를 초기화
+  // Firebase에서 실시간으로 todos 데이터 구독
   useEffect(() => {
-    if (subtask && subtask.todos) {
+    if (!projectId || !subtask?.id) return;
+
+    const unsubscribe = subscribeToSubtaskTodos(projectId, subtask.id, (todosData) => {
+      // todosData는 { "YYYY-MM-DD": [todos] } 형태
+      // 모든 todos를 배열로 변환하여 state 업데이트
       const allTodos = [];
-      if (typeof subtask.todos === 'object' && !Array.isArray(subtask.todos)) {
-        // 객체 형태: { "2024-01-01": [todos], ... }
-        Object.entries(subtask.todos).forEach(([dateKey, todosArray]) => {
-          if (Array.isArray(todosArray)) {
-            todosArray.forEach(todo => {
-              allTodos.push({
-                ...todo,
-                date: dateKey
-              });
+      Object.entries(todosData || {}).forEach(([dateKey, todosArray]) => {
+        if (Array.isArray(todosArray)) {
+          todosArray.forEach(todo => {
+            // createdAt이 문자열이면 Date 객체로 변환
+            const createdAt = todo.createdAt 
+              ? (todo.createdAt.toDate ? todo.createdAt.toDate() : new Date(todo.createdAt))
+              : new Date(dateKey);
+            
+            // id가 문자열이면 숫자로 변환 시도 (기존 코드와 호환성)
+            const todoId = todo.id ? (typeof todo.id === 'string' ? parseInt(todo.id) || todo.id : todo.id) : Date.now();
+            
+            allTodos.push({
+              ...todo,
+              id: todoId,
+              date: dateKey,
+              createdAt: createdAt
             });
-          }
-        });
-      } else if (Array.isArray(subtask.todos)) {
-        // 배열 형태 (createdAt 기준으로 처리)
-        allTodos.push(...subtask.todos);
-      }
+          });
+        }
+      });
       setTodos(allTodos);
-    }
-  }, [subtask]);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [projectId, subtask?.id]);
 
   // 초기 선택 날짜를 subtask의 startDate로 설정
   useEffect(() => {
@@ -179,43 +193,49 @@ function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
     setCurrentWeekIndex(newWeekIndex);
   };
 
-  const handleUpdateTodos = (updatedTodos) => {
+  const handleUpdateTodos = async (updatedTodos) => {
+    // 로컬 state 업데이트 (UI 반응성 향상)
     setTodos(updatedTodos);
 
-    if (subtask && onUpdateSubtask) {
-      // 날짜별로 그룹화하여 todos 객체 생성
-      const todosMap = {};
-      updatedTodos.forEach(todo => {
-        const dateKey = formatDate(todo.createdAt);
-        if (!todosMap[dateKey]) {
-          todosMap[dateKey] = [];
-        }
-        const { date, ...todoData } = todo;
-        todosMap[dateKey].push(todoData);
-      });
-
-      // 부모 컴포넌트에 업데이트 전달
-      const updatedSubtask = {
-        ...subtask,
-        todos: todosMap
-      };
-      onUpdateSubtask(updatedSubtask);
-    }
+    // Firebase는 실시간 구독으로 자동 업데이트되므로 여기서는 로컬 state만 업데이트
+    // 실제 Firebase 저장은 개별 함수(addTodo, updateTodo, deleteTodo)에서 처리
   };
 
   // text 수정 핸들러
-  const handleEditText = (todoId, newText) => {
-    const updatedTodos = todos.map(todo =>
-      todo.id === todoId ? { ...todo, text: newText } : todo
-    );
-    handleUpdateTodos(updatedTodos);
+  const handleEditText = async (todoId, newText) => {
+    if (!projectId || !subtask?.id) return;
+
+    // 해당 todo 찾기
+    const todo = todos.find(t => t.id === todoId);
+    if (!todo) return;
+
+    const dateKey = formatDate(todo.createdAt);
+    
+    // Firebase에 업데이트 (id는 문자열로 변환)
+    try {
+      await updateSubtaskTodo(projectId, subtask.id, dateKey, String(todoId), {
+        text: newText
+      });
+      // Firebase 구독으로 자동 업데이트됨
+    } catch (error) {
+      console.error("할 일 수정 중 오류:", error);
+    }
   };
 
   // 투두 완료 핸들러
   const handleTodoComplete = (todoId, updatedTodos) => {
+    // 중복 방지: 이미 처리된 투두는 보상을 지급하지 않음
+    if (processedTodoIdsRef.current.has(todoId)) {
+      console.log(`[SubtaskTodoList] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+      return;
+    }
+
     // 완료된 투두 찾기
     const completedTodo = updatedTodos.find(t => t.id === todoId);
     if (!completedTodo) return;
+
+    // 처리된 투두 ID 추가 (보상 계산 전에 추가하여 중복 방지)
+    processedTodoIdsRef.current.add(todoId);
 
     // 투두 완료 보상 계산
     const todoRewards = calculateTodoReward(completedTodo, updatedTodos, subtask, new Date());
@@ -363,13 +383,73 @@ function SubtaskTodoList({ subtask, onUpdateSubtask, onJellyReward }) {
       {/* 5. content 섹션 - 투두 입력박스 + 투두리스트 */}
       <div className="detail-todo-content">
         <TodoBox
-          todos={todos}
+          todos={todos.filter(todo => {
+            // 선택된 날짜의 todos만 표시
+            const todoDateKey = formatDate(todo.createdAt);
+            const selectedDateKey = formatDate(selectedDate);
+            return todoDateKey === selectedDateKey;
+          })}
           onUpdateTodos={handleUpdateTodos}
           showAddInput={true}
           selectedDate={selectedDate}
           mode="subtask"
           onEditText={handleEditText}
           onTodoComplete={handleTodoComplete}
+          onAddTodo={async (newTodo) => {
+            // Todo 추가 시 Firebase에 저장
+            if (!projectId || !subtask?.id) return;
+            
+            const dateKey = formatDate(selectedDate);
+            // Firebase의 addSubtaskTodo가 id를 자동 생성하므로 id는 제외
+            const todoData = {
+              text: newTodo.text,
+              progress: newTodo.progress || 0,
+              completed: newTodo.completed || false,
+              createdAt: selectedDate
+            };
+            
+            try {
+              await addSubtaskTodo(projectId, subtask.id, dateKey, todoData);
+              // Firebase 구독으로 자동 업데이트됨
+            } catch (error) {
+              console.error("할 일 추가 중 오류:", error);
+            }
+          }}
+          onUpdateProgress={async (todoId, newProgress) => {
+            // Todo 진행도 업데이트 시 Firebase에 저장
+            if (!projectId || !subtask?.id) return;
+
+            const todo = todos.find(t => t.id === todoId);
+            if (!todo) return;
+
+            const dateKey = formatDate(todo.createdAt);
+            
+            try {
+              await updateSubtaskTodo(projectId, subtask.id, dateKey, String(todoId), {
+                progress: newProgress,
+                completed: newProgress === 100
+              });
+              // Firebase 구독으로 자동 업데이트됨
+            } catch (error) {
+              console.error("할 일 진행도 업데이트 중 오류:", error);
+            }
+          }}
+          onDeleteTodo={async (todoId) => {
+            // Todo 삭제 시 Firebase에서 제거
+            if (!projectId || !subtask?.id) return;
+
+            const todo = todos.find(t => t.id === todoId);
+            if (!todo) return;
+
+            const dateKey = formatDate(todo.createdAt);
+            
+            try {
+              await deleteSubtaskTodo(projectId, subtask.id, dateKey, String(todoId));
+              // Firebase 구독으로 자동 업데이트됨
+            } catch (error) {
+              console.error("할 일 삭제 중 오류:", error);
+            }
+          }}
         />
       </div>
     </div>
