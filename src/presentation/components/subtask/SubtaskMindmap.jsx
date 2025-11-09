@@ -198,10 +198,7 @@ function SubtaskMindmap({
         <div className="main-content-detail">
             {/* 프로젝트 정보 */}
             <article className="main-content--info">
-                <span className="bold">{project.title}</span>의 세부 프로젝트 :
-                <span className="bold">코딩테스트 매일 풀기</span>
-                <span className="date-range">2025.10.21까지</span>
-                <span></span>
+                <span className="bold">{project.title}</span>의 세부 프로젝트
             </article>
             {/* 마인드맵 */}
             <div 
