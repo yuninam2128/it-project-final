@@ -1,5 +1,5 @@
 // Home.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/header/header";
 import ProjectMap from "../components/project/ProjectMap";
@@ -12,7 +12,7 @@ import JellyRewardPopup from "../components/jelly/JellyRewardPopup";
 import "./Home.css";
 import TodaysTodo from "../components/todo/TodaysTodo";
 import { subscribeAuth, getCurrentUserDisplayName } from '../../services/auth';
-import { getUserCoins, setUserCoins } from '../../services/coins';
+import { getUserCoins, setUserCoins, incrementUserCoins } from '../../services/coins';
 import {
   createProject,
   updateProject,
@@ -37,6 +37,8 @@ function Home() {
   const [jellies, setJellies] = useState({ fire: 0, heart: 0, light: 0 }); //젤리 개수
   const [jellyReward, setJellyReward] = useState(null); //젤리 획득 팝업 표시용
   const [allTodos, setAllTodos] = useState([]); // 모든 투두 리스트
+  const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
+  const processingTodoIdsRef = useRef(new Set()); // 처리 중인 Todo ID 저장 (비동기 중복 방지용)
   // const today = getCurrentDate(); // 오늘 날짜 변수
 
   //로그인 상태 구독
@@ -418,8 +420,8 @@ function Home() {
     return typeMap[type] || type;
   };
 
-  // 젤리 획득 처리 함수
-  const handleJellyReward = async (rewards, todoId) => {
+  // 젤리 획득 처리 함수 (useCallback으로 메모이제이션 + 중복 방지)
+  const handleJellyReward = useCallback(async (rewards, todoId) => {
     console.log('[Home.jsx] handleJellyReward 호출:', {
       todoId,
       rewards,
@@ -433,34 +435,61 @@ function Home() {
       return;
     }
 
+    // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
+    // 비동기 처리 중에도 중복 방지를 위해 처리 시작 시점에 체크
+    if (todoId) {
+      if (processedTodoIdsRef.current.has(todoId)) {
+        console.log(`[Home.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+        return; // 이미 처리된 투두는 보상을 지급하지 않음
+      }
+      if (processingTodoIdsRef.current.has(todoId)) {
+        console.log(`[Home.jsx] TodoId ${todoId}는 처리 중임 - 중복 방지`);
+        return; // 처리 중인 투두는 보상을 지급하지 않음
+      }
+      // 처리 중인 투두 ID 추가 (비동기 처리 전에 추가하여 중복 방지)
+      processingTodoIdsRef.current.add(todoId);
+    }
+
     if (!currentUser) {
       console.warn('[Home.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
       // 로그인하지 않아도 팝업은 표시
+      if (todoId) {
+        processingTodoIdsRef.current.delete(todoId);
+      }
       setJellyReward(rewards);
       return;
     }
 
     try {
-      // 현재 사용자의 젤리 보유 수 가져오기
-      const currentCoins = await getUserCoins(currentUser.uid);
-      console.log('[Home.jsx] 현재 젤리 보유 수:', currentCoins);
-
-      // 보상만큼 더하기
-      const updatedCoins = { ...currentCoins };
+      // 보상만큼 증가시킬 값 계산
+      const coinIncrements = {
+        fireJelly: 0,
+        lightJelly: 0,
+        heartJelly: 0
+      };
+      
       rewards.forEach(reward => {
         const fieldName = mapRewardTypeToFirebaseField(reward.type);
         if (fieldName) {
-          // 명시적으로 Number로 변환하여 계산
-          const currentAmount = Number(updatedCoins[fieldName] || 0);
           const rewardAmount = Number(reward.amount);
-          updatedCoins[fieldName] = currentAmount + rewardAmount;
-          console.log(`[Home.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+          coinIncrements[fieldName] = (coinIncrements[fieldName] || 0) + rewardAmount;
+          console.log(`[Home.jsx] 젤리 증가: ${reward.type}(${rewardAmount}) -> ${fieldName}: +${coinIncrements[fieldName]}`);
         }
       });
 
-      // Firebase에 저장
-      await setUserCoins(currentUser.uid, updatedCoins);
-      console.log('[Home.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+      // Firebase에 원자적 증가 연산으로 저장 (경쟁 조건 방지)
+      await incrementUserCoins(currentUser.uid, coinIncrements);
+      console.log('[Home.jsx] Firebase에 젤리 증가 완료:', coinIncrements);
+      
+      // 현재 값 확인 (로깅용)
+      const currentCoins = await getUserCoins(currentUser.uid);
+      console.log('[Home.jsx] 현재 젤리 보유 수:', currentCoins);
+
+      // 처리 완료: 처리 중인 ID를 제거하고 처리된 ID에 추가
+      if (todoId) {
+        processingTodoIdsRef.current.delete(todoId);
+        processedTodoIdsRef.current.add(todoId);
+      }
 
       // 로컬 state도 업데이트 (UI 반응성 향상)
       setJellies(prev => {
@@ -473,13 +502,17 @@ function Home() {
       });
     } catch (error) {
       console.error('[Home.jsx] 젤리 저장 중 오류:', error);
+      // 오류 발생 시 처리 중인 ID 제거 (재시도 가능하도록)
+      if (todoId) {
+        processingTodoIdsRef.current.delete(todoId);
+      }
       // 오류가 발생해도 팝업은 표시
     }
 
     // 팝업 표시
     console.log('[Home.jsx] setJellyReward 실행:', rewards);
     setJellyReward(rewards);
-  };
+  }, [currentUser]);
 
   // 오늘 날짜 문자열 반환 (YYYY-MM-DD) - 로컬 시간대 기준
   const getCurrentDate = () => {

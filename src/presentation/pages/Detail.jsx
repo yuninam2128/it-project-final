@@ -11,7 +11,7 @@ import Sidebar from "../components/sidebar/Sidebar";
 import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
 import { subscribeAuth } from "../../services/auth";
-import { getUserCoins, setUserCoins } from "../../services/coins";
+import { getUserCoins, setUserCoins, incrementUserCoins } from "../../services/coins";
 
 
 
@@ -99,26 +99,29 @@ function ProjectDetail() {
       }
 
       try {
-        // 현재 사용자의 젤리 보유 수 가져오기
-        const currentCoins = await getUserCoins(currentUser.uid);
-        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
-
-        // 보상만큼 더하기
-        const updatedCoins = { ...currentCoins };
+        // 보상만큼 증가시킬 값 계산
+        const coinIncrements = {
+          fireJelly: 0,
+          lightJelly: 0,
+          heartJelly: 0
+        };
+        
         rewards.forEach(reward => {
           const fieldName = mapRewardTypeToFirebaseField(reward.type);
           if (fieldName) {
-            // 명시적으로 Number로 변환하여 계산
-            const currentAmount = Number(updatedCoins[fieldName] || 0);
             const rewardAmount = Number(reward.amount);
-            updatedCoins[fieldName] = currentAmount + rewardAmount;
-            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+            coinIncrements[fieldName] = (coinIncrements[fieldName] || 0) + rewardAmount;
+            console.log(`[Detail.jsx] 젤리 증가: ${reward.type}(${rewardAmount}) -> ${fieldName}: +${coinIncrements[fieldName]}`);
           }
         });
 
-        // Firebase에 저장
-        await setUserCoins(currentUser.uid, updatedCoins);
-        console.log('[Detail.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+        // Firebase에 원자적 증가 연산으로 저장 (경쟁 조건 방지)
+        await incrementUserCoins(currentUser.uid, coinIncrements);
+        console.log('[Detail.jsx] Firebase에 젤리 증가 완료:', coinIncrements);
+        
+        // 현재 값 확인 (로깅용)
+        const currentCoins = await getUserCoins(currentUser.uid);
+        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
 
         // 처리 완료: 처리 중인 ID를 제거하고 처리된 ID에 추가
         if (todoId) {
