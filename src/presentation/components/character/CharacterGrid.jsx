@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CharacterGrid.css";
 import CharacterDisplay from "./CharacterDisplay";
@@ -23,6 +23,9 @@ function CharacterGrid({ characters, onSelect }) {
 
   // 캐릭터 해금 상태 관리
   const [unlockedCharacters, setUnlockedCharacters] = useState([]);
+  
+  // 이전 저장된 데이터를 추적하여 불필요한 저장 방지
+  const lastSavedDataRef = useRef(null);
 
   // 닉네임 상태 관리
   const [nickname, setNickname] = useState('내이름은뿌꾸');
@@ -60,21 +63,38 @@ function CharacterGrid({ characters, onSelect }) {
         // 로그인된 경우 파이어베이스에서 데이터 불러오기
         try {
           const characterData = await getUserCharacterData(user.uid);
-          if (characterData) {
+          // characterData가 있고 unlockedCharacters가 존재하며 비어있지 않으면 사용
+          if (characterData && characterData.unlockedCharacters && characterData.unlockedCharacters.length > 0) {
             setUnlockedCharacters(characterData.unlockedCharacters);
-            setNickname(characterData.nickname);
-            setSelectedCharacter(characterData.selectedCharacter);
+            setNickname(characterData.nickname || '내이름은뿌꾸');
+            setSelectedCharacter(characterData.selectedCharacter || characterData.unlockedCharacters.find(char => char.unlocked) || null);
           } else {
-            // 첫 로그인인 경우 초기 데이터 설정
-            const initialData = await initializeUserCharacterData(user.uid, characters);
-            setUnlockedCharacters(initialData.unlockedCharacters);
-            setNickname(initialData.nickname);
-            setSelectedCharacter(initialData.selectedCharacter);
+            // 첫 로그인이거나 데이터가 없는 경우 초기 데이터 설정
+            // characters prop을 사용하여 초기화
+            const charsToInitialize = characters && characters.length > 0 ? characters : [];
+            if (charsToInitialize.length > 0) {
+              const initialData = await initializeUserCharacterData(user.uid, charsToInitialize);
+              const initializedChars = initialData.unlockedCharacters || charsToInitialize;
+              setUnlockedCharacters(initializedChars);
+              setNickname(initialData.nickname || '내이름은뿌꾸');
+              // 기본 캐릭터(해금된 첫 번째 캐릭터)를 자동 선택
+              const defaultChar = initializedChars.find(char => char.unlocked) || initializedChars[0] || null;
+              setSelectedCharacter(defaultChar);
+            } else {
+              // characters prop이 없으면 빈 배열로 설정
+              setUnlockedCharacters([]);
+              setNickname('내이름은뿌꾸');
+              setSelectedCharacter(null);
+            }
           }
         } catch (error) {
           console.error('Error loading character data:', error);
           // 에러 시 기본값으로 초기화
-          setUnlockedCharacters(characters.map(char => ({ ...char, unlocked: char.unlocked })));
+          const defaultChars = characters && characters.length > 0 ? characters : [];
+          setUnlockedCharacters(defaultChars.map(char => ({ ...char, unlocked: char.unlocked || false })));
+          // 기본 캐릭터 자동 선택
+          const defaultChar = defaultChars.find(char => char.unlocked) || defaultChars[0] || null;
+          setSelectedCharacter(defaultChar);
         }
       } else {
         // 로그아웃된 경우 로컬 스토리지에서 불러오기 (오프라인 모드)
@@ -108,18 +128,46 @@ function CharacterGrid({ characters, onSelect }) {
   }, [user]);
 
   // 사용자 데이터 변경 시 파이어베이스에 저장 (닉네임 제외 - saveNickname에서 처리)
+  // 저장을 최소화하기 위해 debounce 및 조건부 저장 추가
   useEffect(() => {
-    if (user && !isLoading) {
+    if (!user || isLoading) return;
+    
+    // unlockedCharacters가 비어있으면 저장하지 않음
+    if (!unlockedCharacters || unlockedCharacters.length === 0) return;
+    
+    // 이전 저장된 데이터와 비교하여 실제로 변경된 경우에만 저장
+    const currentData = {
+      selectedCharacter: selectedCharacter ? selectedCharacter.id : null,
+      unlockedCharacters: unlockedCharacters.map(c => ({ id: c.id, unlocked: c.unlocked })),
+      nickname
+    };
+    
+    const lastSaved = lastSavedDataRef.current;
+    if (lastSaved && 
+        JSON.stringify(currentData.selectedCharacter) === JSON.stringify(lastSaved.selectedCharacter) &&
+        JSON.stringify(currentData.unlockedCharacters) === JSON.stringify(lastSaved.unlockedCharacters) &&
+        currentData.nickname === lastSaved.nickname) {
+      // 변경사항이 없으면 저장하지 않음
+      return;
+    }
+    
+    // 초기 로딩이 완료된 후에만 저장 (무한 루프 방지)
+    const timeoutId = setTimeout(() => {
       const characterData = {
         selectedCharacter,
         unlockedCharacters,
-        nickname // 닉네임도 포함하되, saveNickname에서 저장한 후에는 중복 저장 방지
+        nickname
       };
-      saveUserCharacterData(user.uid, characterData).catch(error => {
+      saveUserCharacterData(user.uid, characterData).then(() => {
+        // 저장 성공 시 이전 데이터 업데이트
+        lastSavedDataRef.current = currentData;
+      }).catch(error => {
         console.error('Error saving character data:', error);
       });
-    }
-  }, [user, selectedCharacter, unlockedCharacters, isLoading]); // nickname 제외하여 무한 루프 방지
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [user, selectedCharacter, unlockedCharacters, isLoading, nickname]);
 
   // 자동 해금 체크 및 업데이트 (임시 코인 로직 제거됨)
   useEffect(() => {
@@ -354,7 +402,7 @@ function CharacterGrid({ characters, onSelect }) {
       
 
         <div className="character-grid">
-          {unlockedCharacters.map((character) => (
+          {(unlockedCharacters.length > 0 ? unlockedCharacters : (characters || [])).map((character) => (
             <div
               key={character.id}
               className={`character-box ${!character.unlocked ? "LockBox" : "UnlockBox"} ${

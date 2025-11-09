@@ -7,9 +7,10 @@ import {
   updateProfile,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence
+  browserSessionPersistence,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export class AuthService {
@@ -129,6 +130,34 @@ export class AuthService {
       }
     } catch (error) {
       console.error('Error ensuring user coins:', error);
+    }
+  }
+
+  async sendPasswordResetEmail(email) {
+    try {
+      await firebaseSendPasswordResetEmail(auth, email);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async findEmailByUsername(username) {
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('username', '==', username));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        return null;
+      }
+      
+      // 첫 번째 매칭되는 사용자의 이메일 반환
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+      return userData.email || null;
+    } catch (error) {
+      console.error('Error finding email by username:', error);
+      throw new Error('이메일 찾기 중 오류가 발생했습니다.');
     }
   }
 }

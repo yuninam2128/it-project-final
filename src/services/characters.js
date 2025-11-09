@@ -12,17 +12,12 @@ export const saveUserCharacterData = async (userId, characterData) => {
   try {
     const userRef = doc(db, 'users', userId);
     
-    // 문서 존재 여부 확인
-    const userSnap = await getDoc(userRef);
-    const existingData = userSnap.exists() ? userSnap.data() : {};
-    const existingCharacterData = existingData.characterData || {};
-    
-    // 기존 데이터와 병합
+    // merge 옵션을 사용하여 기존 데이터를 보존하면서 업데이트
+    // getDoc을 호출하지 않아서 불필요한 읽기 작업 방지
     const updatedCharacterData = {
-      ...existingCharacterData,
-      selectedCharacter: characterData.selectedCharacter !== undefined ? characterData.selectedCharacter : existingCharacterData.selectedCharacter,
-      unlockedCharacters: characterData.unlockedCharacters !== undefined ? characterData.unlockedCharacters : existingCharacterData.unlockedCharacters,
-      nickname: characterData.nickname !== undefined ? characterData.nickname : existingCharacterData.nickname,
+      selectedCharacter: characterData.selectedCharacter !== undefined ? characterData.selectedCharacter : null,
+      unlockedCharacters: characterData.unlockedCharacters !== undefined ? characterData.unlockedCharacters : [],
+      nickname: characterData.nickname !== undefined ? characterData.nickname : '내이름은뿌꾸',
       updatedAt: serverTimestamp()
     };
     
@@ -31,16 +26,20 @@ export const saveUserCharacterData = async (userId, characterData) => {
       updatedCharacterData.userMoney = characterData.userMoney;
     }
     
-    // 문서가 없으면 생성, 있으면 업데이트
-    if (userSnap.exists()) {
-      await updateDoc(userRef, {
-        characterData: updatedCharacterData
-      });
-    } else {
-      await setDoc(userRef, {
-        characterData: updatedCharacterData
-      }, { merge: true });
-    }
+    // merge 옵션을 사용하여 기존 데이터를 보존하면서 업데이트
+    // 문서가 없으면 자동으로 생성됨
+    await updateDoc(userRef, {
+      characterData: updatedCharacterData
+    }).catch(async (error) => {
+      // 문서가 존재하지 않으면 setDoc으로 생성
+      if (error.code === 'not-found' || error.code === 'permission-denied') {
+        await setDoc(userRef, {
+          characterData: updatedCharacterData
+        }, { merge: true });
+      } else {
+        throw error;
+      }
+    });
     
     console.log('캐릭터 데이터 저장 완료:', updatedCharacterData);
   } catch (error) {
