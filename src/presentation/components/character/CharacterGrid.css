@@ -81,7 +81,7 @@
 /* 캐릭터 박스 */
 .character-box {
   width: 190px;
-  height: 220px;
+  height: 280px;
   border-radius: 15px;
   display: flex;
   flex-direction: column;
@@ -126,7 +126,7 @@
 
 /* 이름 */
 .character-name {
-  margin-top: auto;
+  margin-top: 15px;
   font-size: 12px;
   font-weight: 500;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
@@ -190,7 +190,7 @@
   transform: translateY(-50%);
   display: grid;
   grid-template-columns: repeat(2, 190px);
-  grid-template-rows: repeat(3, 220px);
+  grid-template-rows: repeat(3, 280px);
   grid-gap: 20px;
   padding: 30px;
   max-height: 70vh;
@@ -215,7 +215,7 @@
 /* 캐릭터 박스 */
 .character-box {
   width: 190px;
-  height: 220px;
+  height: 280px;
   border-radius: 15px;
   display: flex;
   flex-direction: column;
@@ -260,7 +260,7 @@
 
 /* 이름 */
 .character-name {
-  margin-top: auto;
+  margin-top: 15px;
   font-size: 12px;
   font-weight: 500;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
@@ -278,11 +278,15 @@
 .cost-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 5px;
   background: rgba(0, 0, 0, 0.3);
   padding: 4px 8px;
   border-radius: 12px;
   border: 1px solid rgba(100, 150, 255, 0.3);
+  min-width: 60px;
+  width: 100%;
+  max-width: 80px;
 }
 
 .jelly-icon {
@@ -461,7 +465,7 @@
 
 /* 잠금 해제 버튼 */
 .toggle-button {
-  margin-top: 10px;
+  margin-top: 15px;
   padding: 4px 10px;
   border-radius: 8px;
   border: none;
@@ -857,7 +861,7 @@
 
 /* 잠금 해제 버튼 */
 .toggle-button {
-  margin-top: 10px;
+  margin-top: 15px;
   padding: 4px 10px;
   border-radius: 8px;
   border: none;
