@@ -1,6 +1,6 @@
 import TodoBox from "./TodoBox";
 import "./TodaysTodo.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { updateSubtaskTodo, deleteSubtaskTodo } from "../../../services/projects";
 import { calculateTodoReward, calculateSubtaskReward } from "../../../utils/jellyRewardCalculator";
 
@@ -23,6 +23,7 @@ function TodaysTodo({ todos, onUpdateTodos, currentDate, projects = [], onJellyR
 
   const [todosState, setTodosState] = useState(todos || []);
   const [wasSubtaskComplete, setWasSubtaskComplete] = useState(new Map()); // subtask별 완료 상태 추적
+  const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
 
   // todos prop이 변경될 때마다 todosState 업데이트
   useEffect(() => {
@@ -82,7 +83,17 @@ function TodaysTodo({ todos, onUpdateTodos, currentDate, projects = [], onJellyR
       // Firebase 구독으로 자동 업데이트됨
 
       // 투두가 완료되었을 때 젤리 보상 계산
+      // 중복 방지: 이미 처리된 투두는 보상을 지급하지 않음
       if (oldTodo && newProgress === 100 && oldTodo.progress !== 100) {
+        // 중복 방지: 이미 처리된 투두는 보상을 지급하지 않음
+        if (processedTodoIdsRef.current.has(todoId)) {
+          console.log(`[TodaysTodo] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+          return;
+        }
+
+        // 처리된 투두 ID 추가 (보상 계산 전에 추가하여 중복 방지)
+        processedTodoIdsRef.current.add(todoId);
+
         // 프로젝트와 subtask 정보 찾기
         const project = projects.find(p => p.id === todo.projectId);
         const subtask = project?.subtasks?.find(s => s.id === todo.subtaskId);

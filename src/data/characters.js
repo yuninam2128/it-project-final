@@ -27,10 +27,11 @@ export const characters = [
     image: '/images/char3.png',
     unlocked: false,
     price: {
-      fireJelly: 300,
+      fireJelly: 0,
       lightJelly: 0,
       heartJelly: 200
     },
+
   },
   {
     id: 4,
@@ -38,8 +39,8 @@ export const characters = [
     image: '/images/char4.png', 
     unlocked: false,
     price: {
-      lightJelly: 1000,
       fireJelly: 500,
+      lightJelly: 1000,
       heartJelly: 1500
     },
 

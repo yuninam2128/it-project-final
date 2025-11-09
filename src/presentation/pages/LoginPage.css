@@ -32,6 +32,7 @@
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 10px;
+  margin-top: 70px;
 }
 
 .logtext {
@@ -131,7 +132,7 @@
   font-size: 18px;
   color: #FFFFFF;
   cursor: pointer;
-  margin: 15px 0 30px;
+  margin: 50px 0 30px;
   height: 54px;
 }
 
@@ -163,7 +164,7 @@
   cursor: pointer;
   position: relative;
   left: -20px;
-  top: -15px;
+  top: -100px;
 }
 
 
@@ -172,18 +173,8 @@
   margin-left: 25px;
   position: relative;
   left: 0px;
+  top: -40px;
 }
-
-/* 
-.line {
-  width: 2px;              
-  height: 20px;           
-  background-color: #d9d9d9;
-  transform: none;        
-  align-self: center;
-  margin: 0 15px;          
-}
-*/
 
 /* 모달 오버레이 */
 .modal-overlay {

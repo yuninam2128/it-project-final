@@ -11,7 +11,7 @@ import Sidebar from "../components/sidebar/Sidebar";
 import { FirebaseProjectRepository } from "../../infrastructure/repositories/FirebaseProjectRepository";
 import ProjectTimeline from "../components/project/ProjectTimeline";
 import { subscribeAuth } from "../../services/auth";
-import { getUserCoins, setUserCoins } from "../../services/coins";
+import { getUserCoins, setUserCoins, incrementUserCoins } from "../../services/coins";
 
 
 
@@ -29,6 +29,7 @@ function ProjectDetail() {
 
     const projectRepository = new FirebaseProjectRepository();
     const processedTodoIdsRef = useRef(new Set()); // 처리된 Todo ID 저장 (중복 방지용)
+    const processingTodoIdsRef = useRef(new Set()); // 처리 중인 Todo ID 저장 (비동기 중복 방지용)
 
     // 현재 사용자 구독
     useEffect(() => {
@@ -73,44 +74,60 @@ function ProjectDetail() {
       }
 
       // TodoId 기반 중복 방지: 같은 Todo는 한 번만 처리
-      if (todoId && processedTodoIdsRef.current.has(todoId)) {
-        console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
-        return; // 이미 처리된 투두는 보상을 지급하지 않음
-      }
-
-      // 처리된 투두 ID 추가
+      // 비동기 처리 중에도 중복 방지를 위해 처리 시작 시점에 체크
       if (todoId) {
-        processedTodoIdsRef.current.add(todoId);
+        if (processedTodoIdsRef.current.has(todoId)) {
+          console.log(`[Detail.jsx] TodoId ${todoId}는 이미 처리됨 - 중복 방지`);
+          return; // 이미 처리된 투두는 보상을 지급하지 않음
+        }
+        if (processingTodoIdsRef.current.has(todoId)) {
+          console.log(`[Detail.jsx] TodoId ${todoId}는 처리 중임 - 중복 방지`);
+          return; // 처리 중인 투두는 보상을 지급하지 않음
+        }
+        // 처리 중인 투두 ID 추가 (비동기 처리 전에 추가하여 중복 방지)
+        processingTodoIdsRef.current.add(todoId);
       }
 
       if (!currentUser) {
         console.warn('[Detail.jsx] 사용자가 로그인하지 않았습니다. 젤리를 저장할 수 없습니다.');
         // 로그인하지 않아도 팝업은 표시
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+        }
         setJellyReward(rewards);
         return;
       }
 
       try {
-        // 현재 사용자의 젤리 보유 수 가져오기
-        const currentCoins = await getUserCoins(currentUser.uid);
-        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
-
-        // 보상만큼 더하기
-        const updatedCoins = { ...currentCoins };
+        // 보상만큼 증가시킬 값 계산
+        const coinIncrements = {
+          fireJelly: 0,
+          lightJelly: 0,
+          heartJelly: 0
+        };
+        
         rewards.forEach(reward => {
           const fieldName = mapRewardTypeToFirebaseField(reward.type);
           if (fieldName) {
-            // 명시적으로 Number로 변환하여 계산
-            const currentAmount = Number(updatedCoins[fieldName] || 0);
             const rewardAmount = Number(reward.amount);
-            updatedCoins[fieldName] = currentAmount + rewardAmount;
-            console.log(`[Detail.jsx] Firebase 젤리 업데이트: ${reward.type}(${rewardAmount}) -> ${fieldName}: ${updatedCoins[fieldName]}`);
+            coinIncrements[fieldName] = (coinIncrements[fieldName] || 0) + rewardAmount;
+            console.log(`[Detail.jsx] 젤리 증가: ${reward.type}(${rewardAmount}) -> ${fieldName}: +${coinIncrements[fieldName]}`);
           }
         });
 
-        // Firebase에 저장
-        await setUserCoins(currentUser.uid, updatedCoins);
-        console.log('[Detail.jsx] Firebase에 젤리 저장 완료:', updatedCoins);
+        // Firebase에 원자적 증가 연산으로 저장 (경쟁 조건 방지)
+        await incrementUserCoins(currentUser.uid, coinIncrements);
+        console.log('[Detail.jsx] Firebase에 젤리 증가 완료:', coinIncrements);
+        
+        // 현재 값 확인 (로깅용)
+        const currentCoins = await getUserCoins(currentUser.uid);
+        console.log('[Detail.jsx] 현재 젤리 보유 수:', currentCoins);
+
+        // 처리 완료: 처리 중인 ID를 제거하고 처리된 ID에 추가
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+          processedTodoIdsRef.current.add(todoId);
+        }
 
         // 로컬 state도 업데이트 (UI 반응성 향상)
         setJellies(prev => {
@@ -123,6 +140,10 @@ function ProjectDetail() {
         });
       } catch (error) {
         console.error('[Detail.jsx] 젤리 저장 중 오류:', error);
+        // 오류 발생 시 처리 중인 ID 제거 (재시도 가능하도록)
+        if (todoId) {
+          processingTodoIdsRef.current.delete(todoId);
+        }
         // 오류가 발생해도 팝업은 표시
       }
 
