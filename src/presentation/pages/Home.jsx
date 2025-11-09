@@ -23,7 +23,7 @@ import {
 } from '../../services/projects';
 
 // Mock 데이터 사용 (Firebase 연결 제거)
-// Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변경
+// Firebase 복구 시: mockAuth → auth, mockProjects → projects로 변
 
 function Home() {
   const [projects, setProjects] = useState([]); //현재 사용자 프로젝트 리스트 저장
