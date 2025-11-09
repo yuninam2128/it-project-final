@@ -31,9 +31,9 @@ export class AuthService {
           displayName: displayName,
           username: username,
           coins: {
-            fireJelly: 1000,    // 불꽃젤리
-            lightJelly: 3000,   // 빛나는 젤리  
-            heartJelly: 2000    // 하트젤리
+            fireJelly: 0,    // 불꽃젤리
+            lightJelly: 0,   // 빛나는 젤리  
+            heartJelly: 0    // 하트젤리
           },
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
@@ -120,9 +120,9 @@ export class AuthService {
           // 젤리 코인 데이터가 없으면 추가
           await setDoc(userRef, {
             coins: {
-              fireJelly: 1000,    // 불꽃젤리
-              lightJelly: 3000,   // 빛나는 젤리  
-              heartJelly: 2000    // 하트젤리
+              fireJelly: 0,    // 불꽃젤리
+              lightJelly: 0,   // 빛나는 젤리  
+              heartJelly: 0    // 하트젤리
             },
             updatedAt: serverTimestamp()
           }, { merge: true });

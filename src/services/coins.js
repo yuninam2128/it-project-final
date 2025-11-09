@@ -2,9 +2,9 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
 const defaultCoins = { 
-  fireJelly: 1000,    // 불꽃젤리
-  lightJelly: 3000,   // 빛나는 젤리  
-  heartJelly: 2000    // 하트젤리
+  fireJelly: 0,    // 불꽃젤리
+  lightJelly: 0,   // 빛나는 젤리  
+  heartJelly: 0    // 하트젤리
 };
 
 export const subscribeUserCoins = (userId, callback) => {

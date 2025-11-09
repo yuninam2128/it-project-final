@@ -4,9 +4,9 @@ import { subscribeAuth } from "../../../services/auth";
 import { subscribeUserCoins } from "../../../services/coins";
 
 function Header({ onAddClick }) {
-  const [fire, setFire] = useState(1000);
-  const [heart, setHeart] = useState(2000);
-  const [light, setLight] = useState(3000);
+  const [fire, setFire] = useState(0);
+  const [heart, setHeart] = useState(0);
+  const [light, setLight] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
 
   // 사용자 인증 상태 구독
@@ -22,9 +22,9 @@ function Header({ onAddClick }) {
     if (!currentUser) return;
 
     const unsubscribe = subscribeUserCoins(currentUser.uid, (coins) => {
-      setFire(coins.fireJelly || 1000);
-      setHeart(coins.heartJelly || 2000);
-      setLight(coins.lightJelly || 3000);
+      setFire(coins.fireJelly !== undefined ? coins.fireJelly : 0);
+      setHeart(coins.heartJelly !== undefined ? coins.heartJelly : 0);
+      setLight(coins.lightJelly !== undefined ? coins.lightJelly : 0);
     });
 
     return () => unsubscribe();

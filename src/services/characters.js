@@ -73,9 +73,9 @@ export const initializeUserCharacterData = async (userId, defaultCharacters) => 
       selectedCharacter: null,
       unlockedCharacters: defaultCharacters.map(char => ({ ...char, unlocked: char.unlocked })),
       userMoney: {
-        fireJelly: 1000,
-        lightJelly: 3000,
-        heartJelly: 2000
+        fireJelly: 0,
+        lightJelly: 0,
+        heartJelly: 0
       },
       nickname: '내이름은뿌꾸',
       createdAt: serverTimestamp(),

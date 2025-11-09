@@ -16,9 +16,9 @@ function CharacterGrid({ characters, onSelect }) {
 
   // 젤리 코인 상태 (불꽃젤리, 빛나는 젤리, 하트젤리)
   const [jellyCoins, setJellyCoins] = useState({
-    fireJelly: 1000,
-    lightJelly: 3000,
-    heartJelly: 2000
+    fireJelly: 0,
+    lightJelly: 0,
+    heartJelly: 0
   });
 
   // 캐릭터 해금 상태 관리
@@ -187,9 +187,9 @@ function CharacterGrid({ characters, onSelect }) {
 
     const unsubscribe = subscribeUserCoins(user.uid, (coins) => {
       setJellyCoins({
-        fireJelly: coins.fireJelly || 1000,
-        lightJelly: coins.lightJelly || 3000,
-        heartJelly: coins.heartJelly || 2000
+        fireJelly: coins.fireJelly !== undefined ? coins.fireJelly : 0,
+        lightJelly: coins.lightJelly !== undefined ? coins.lightJelly : 0,
+        heartJelly: coins.heartJelly !== undefined ? coins.heartJelly : 0
       });
     });
 
