@@ -423,7 +423,7 @@ function CharacterGrid({ characters, onSelect }) {
       
       {/* 젤리 코인 헤더 */}
       <div className="store-header">
-        <div className="header">
+        <div className="Character-header">
           <div className="right-header">
             <button className="header__button header__button--right">
               <img src="/images/fire-jelly.svg" alt="불꽃젤리" className="fire-jelly" />
