@@ -101,8 +101,14 @@ function SubtaskTodoList({ subtask, projectId, onUpdateSubtask, onJellyReward })
     if (!subtask || !subtask.startDate || !subtask.endDate) {
       return true;
     }
+
+    // 시간 무시하고 날짜만 비교
     const startDate = new Date(subtask.startDate);
     const endDate = new Date(subtask.endDate);
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     return date >= startDate && date <= endDate;
   };
 

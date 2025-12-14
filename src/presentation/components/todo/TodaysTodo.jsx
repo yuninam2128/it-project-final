@@ -33,7 +33,7 @@ function TodaysTodo({ todos, onUpdateTodos, currentDate, projects = [], onJellyR
   // 마감일(deadline)이 오늘인 투두만 필터링
   const todayTodos = todosState.filter(todo => {
     // deadline이 있으면 deadline 기준, 없으면 date(생성일) 기준
-    const deadlineDate = todo.deadline || todo.date;
+    const deadlineDate = todo.date;
     return deadlineDate === currentDateKey;
   });
   
